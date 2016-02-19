@@ -1,0 +1,17 @@
+{
+"manifest_version": 2,
+    "name": "Add MAL Columns",
+    "description": "Exactly what it says",
+    "version": "0.1",
+    "content_scripts": [
+        {
+            "matches": [
+                "http://myanimelist.net/*"
+            ],
+            "js": [
+                "content.js"
+            ],
+            "run_at": "document_end"
+        }
+    ]
+}
