@@ -47,7 +47,7 @@ if (isNewList) {
         var rowTable = $(el).prev();
         var rowRow = rowTable.find("tr");
         var rowCol = rowTable.find("td").last();
-        
+
         var tdType = rowCol.attr("class");
         rowRow.append('<td class="' + tdType + '" align="center" width="70"><span id=""></span></td>');
         rowRow.append('<td class="' + tdType + '" align="center" width="70"><span id=""></span></td>');
@@ -56,3 +56,28 @@ if (isNewList) {
 }
 
 console.log(ids);
+
+
+var scrapeAnime = function(id) {
+    return $.ajax({
+        url: "http://myanimelist.net/anime/" + id,
+        type: 'GET',
+        dataType: "html",
+        success: function (data) {
+            return data;
+        },
+        error: function () {
+            console.log("error");
+        }
+    });
+}
+
+var parseAnimeInfo = function(data) {
+    var stat_1 = $($(data.responseText).find("span:contains('Premiered')")[0]).next().text();
+    var stat_2 = $($(data.responseText).find("span:contains('Studios')")[0]).next().text();
+    var stat_3 = $($(data.responseText).find("span:contains('Ranked')")[0]).next().text();
+    var stat_4 = $($(data.responseText).find("span:contains('Score')")[0]).next().text();
+    return [stat_1, stat_2, stat_3, stat_4];
+}
+
+var ddd = scrapeAnime(27631);
