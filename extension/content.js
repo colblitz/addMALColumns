@@ -19,44 +19,101 @@ var testNewList = function() {
 
 var isNewList = testNewList();
 
-if (isNewList) {
-    var data = $('table.list-table').data();
-    var ids = data["items"].map(function(o) { return o["anime_id"]; });
-} else {
-    var more = $('[id^=more');
-    var ids = more.map(function(i, el) { return parseInt($(el).attr('id').replace("more", "")); });
+var getListIds = function() {
+    var ids;
+    if (isNewList) {
+        var data = $('table.list-table').data();
+        ids = data["items"].map(function(o) { return o["anime_id"]; });
+    } else {
+        var more = $('[id^=more');
+        ids = more.map(function(i, el) { return parseInt($(el).attr('id').replace("more", "")); });
+    }
+    return ids;
+};
+
+var ids = getListIds();
+
+var getData = function(ids) {
+
+};
+
+var listData = getData(ids);
+
+
+var addColumn = function(name, key) {
+    // adjust table width;
+    // $("#list_surround").width(1100);
+
+    // add columns
+    if (isNewList) {
+        var headerRow = $("tr.list-table-header");
+        headerRow.append('<th class="header-title type">' + name + '</th>');
+
+        var tableRows = $("tr.list-table-data");
+        tableRows.map(function(i, el) {
+            var id = parseInt($(el).next().attr('id').replace("more-", ""));
+            var data = id;
+            $(el).append('<td class="data ' + key + '">' + data + '</td>');
+        });
+    } else {
+        var headers = $('[class^=header_');
+        headers.map(function(i, el) {
+            var headerTable = $(el).next();
+            var headerRow = headerTable.find("tr");
+            var headerCol = headerTable.find("td").last();
+
+            headerRow.append('<td class="table_header" width="90" align="center" nowrap=""><strong>' + name + '</strong></td>');
+        })
+
+        var more = $('[id^=more');
+        more.map(function(i, el) {
+            var rowTable = $(el).prev();
+            var rowRow = rowTable.find("tr");
+            var rowCol = rowTable.find("td").last();
+
+            var tdType = rowCol.attr("class");
+
+            var id = parseInt($(el).attr('id').replace("more", ""));
+            var data = id;
+            rowRow.append('<td class="' + tdType + '" align="center" width="90"><span id="">' + data + '</span></td>');
+        })
+    }
 }
 
-if (isNewList) {
+setTimeout(function(){
+    addColumn('Score', 'score');
+}, 1000);
 
-} else {
-    $("#list_surround").width(1100);
-    var headers = $('[class^=header_');
-    headers.map(function(i, el) {
-        var headerTable = $(el).next();
-        var headerRow = headerTable.find("tr");
-        var headerCol = headerTable.find("td").last();
+var sortColumn = function(name) {
+    // http://stackoverflow.com/questions/7831712/jquery-sort-divs-by-innerhtml-of-children
+};
 
-        headerRow.append('<td class="table_header" width="70" align="center" nowrap=""><strong>Tags</strong></td>');
-        headerRow.append('<td class="table_header" width="70" align="center" nowrap=""><strong>Tags</strong></td>');
-        headerRow.append('<td class="table_header" width="70" align="center" nowrap=""><strong>Tags</strong></td>');
-    })
+var alertFromContent = function(asdf) {
+    alert(asdf);
+};
 
-    var more = $('[id^=more');
-    more.map(function(i, el) {
-        var rowTable = $(el).prev();
-        var rowRow = rowTable.find("tr");
-        var rowCol = rowTable.find("td").last();
+// chrome.runtime.onMessage.addListener(function callback)
+// chrome.runtime.onMessage.addListener(
+//     function(request, sender, sendResponse) {
+//         console.log("alksjdflkajsdflkjalsdfjlajdlkf");
+//         if (request.greeting == "hello")
+//         alert("hello background");
+//     }
+// );
 
-        var tdType = rowCol.attr("class");
-        rowRow.append('<td class="' + tdType + '" align="center" width="70"><span id=""></span></td>');
-        rowRow.append('<td class="' + tdType + '" align="center" width="70"><span id=""></span></td>');
-        rowRow.append('<td class="' + tdType + '" align="center" width="70"><span id=""></span></td>');
-    })
-}
+chrome.runtime.onMessage.addListener(
+  function(request, sender, sendResponse) {
+    console.log("got message: " + request);
+    console.log(request);
+    console.log(request.greeting);
 
-console.log(ids);
+    // if( request.message === "clicked_browser_action" ) {
+    //   var firstHref = $("a[href^='http']").eq(0).attr("href");
 
+    //   console.log(firstHref);
+    // }
+  }
+);
 
 var scrapeAnime = function(id) {
     return $.ajax({
@@ -80,4 +137,4 @@ var parseAnimeInfo = function(data) {
     return [stat_1, stat_2, stat_3, stat_4];
 }
 
-var ddd = scrapeAnime(27631);
+//var ddd = scrapeAnime(27631);

@@ -14,7 +14,14 @@
             "run_at": "document_end"
         }
     ],
+    "browser_action": {
+        "default_icon": "icon.png",
+        "default_popup": "popup.html"
+    },
     "background": {
-        "scripts": ["jquery-1.12.0.min.js"]
-    }
+        "scripts": ["jquery-1.12.0.min.js", "background.js"]
+    },
+    "permissions": [
+        "tabs"
+    ]
 }
