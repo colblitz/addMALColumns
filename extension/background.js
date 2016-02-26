@@ -4,6 +4,5 @@ function testRequest() {
 	console.log("background lakjsdf");
     chrome.tabs.getSelected(null, function(tab) {
     	chrome.tabs.sendMessage(tab.id, {greeting: "hello"});
-        // chrome.runtime.sendMessage(tab.id, {greeting: "hello"});
     });
 }
