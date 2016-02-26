@@ -22,6 +22,7 @@
         "scripts": ["jquery-1.12.0.min.js", "background.js"]
     },
     "permissions": [
-        "tabs"
+        "tabs",
+        "storage"
     ]
 }

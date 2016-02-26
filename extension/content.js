@@ -1,6 +1,10 @@
 // http://myanimelist.net/animelist/Tigress5
 // http://myanimelist.net/animelist/colblitz
 
+String.prototype.capitalizeFirstLetter = function() {
+    return this.charAt(0).toUpperCase() + this.slice(1);
+}
+
 if (!window.jQuery) {
     console.log("no jquery");
 } else {
@@ -39,21 +43,22 @@ var getData = function(ids) {
 
 var listData = getData(ids);
 
+var columns = {}
 
-var addColumn = function(name, key) {
+var addColumn = function(name) {
     // adjust table width;
     // $("#list_surround").width(1100);
-
+    var allItems = []
     // add columns
     if (isNewList) {
         var headerRow = $("tr.list-table-header");
-        headerRow.append('<th class="header-title type">' + name + '</th>');
+        headerRow.append('<th class="header-title type">' + name.capitalizeFirstLetter() + '</th>');
 
         var tableRows = $("tr.list-table-data");
         tableRows.map(function(i, el) {
             var id = parseInt($(el).next().attr('id').replace("more-", ""));
             var data = id;
-            $(el).append('<td class="data ' + key + '">' + data + '</td>');
+            $(el).append('<td class="data-' + name + '">' + data + '</td>');
         });
     } else {
         var headers = $('[class^=header_');
@@ -62,7 +67,9 @@ var addColumn = function(name, key) {
             var headerRow = headerTable.find("tr");
             var headerCol = headerTable.find("td").last();
 
-            headerRow.append('<td class="table_header" width="90" align="center" nowrap=""><strong>' + name + '</strong></td>');
+            var newCell = $('<td class="table_header" width="90" align="center" nowrap=""><strong>' + name.capitalizeFirstLetter() + '</strong></td>');
+            headerRow.append(newCell);
+            allItems.push(newCell);
         })
 
         var more = $('[id^=more');
@@ -75,13 +82,57 @@ var addColumn = function(name, key) {
 
             var id = parseInt($(el).attr('id').replace("more", ""));
             var data = id;
-            rowRow.append('<td class="' + tdType + '" align="center" width="90"><span id="">' + data + '</span></td>');
+            var newCell = $('<td class="' + tdType + '" align="center" width="90"><span id="">' + data + '</span></td>');
+            rowRow.append(newCell);
+            allItems.push(newCell);
         })
     }
+
+    // allItems.forEach(function(el, i) {
+    //   console.log('---');
+    //   console.log(i);
+    //   console.log(el);
+    //   console.log($(el));
+    //   console.log($(el).text());
+    // });
+    columns[name] = allItems;
 }
 
+var showColumn = function(colName, show) {
+  console.log("showing column: " + colName);
+  console.log(columns);
+  if (colName in columns) {
+    if (show) {
+      columns[colName].forEach(function(el, i) {
+        $(el).show();
+      });
+    } else {
+      columns[colName].forEach(function(el, i) {
+        $(el).hide();
+      });
+    }
+  } else {
+    if (show) {
+      addColumn(colName);
+    } else {
+      // nothing
+    }
+  }
+}
+
+// TODO: Blech
+addColumn("season");
+addColumn("studio");
+addColumn("score");
+addColumn("rank");
+
+showColumn("season", false);
+showColumn("studio", false);
+showColumn("score", false);
+showColumn("rank", false);
+
 setTimeout(function(){
-    addColumn('Score', 'score');
+    //addColumn('Score', 'score');
 }, 1000);
 
 var sortColumn = function(name) {
@@ -103,15 +154,11 @@ var alertFromContent = function(asdf) {
 
 chrome.runtime.onMessage.addListener(
   function(request, sender, sendResponse) {
-    console.log("got message: " + request);
-    console.log(request);
-    console.log(request.greeting);
-
-    // if( request.message === "clicked_browser_action" ) {
-    //   var firstHref = $("a[href^='http']").eq(0).attr("href");
-
-    //   console.log(firstHref);
-    // }
+    console.log("got " + JSON.stringify(request.columns));
+    for (var colName in request.columns) {
+      console.log("want column " + colName + ": " + request.columns[colName]);
+      showColumn(colName, request.columns[colName]);
+    }
   }
 );
 

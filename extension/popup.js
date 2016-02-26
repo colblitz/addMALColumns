@@ -1,17 +1,26 @@
 document.addEventListener('DOMContentLoaded', function() {
+  // get state
+  chrome.storage.local.get(["columns"], function(columns) {
+    $('.columnCheck').each(function() {
+      if (columns.columns[$(this).prop('name')]) {
+        $(this).prop('checked', true);
+      }
+    });
+  });
+
+  // add functionality for button
   var button = document.getElementById('button1');
   button.addEventListener('click', function() {
-    console.log("lakjsdflkjalksdjf");
-
     var columns = {};
     $('.columnCheck').each(function() {
       columns[$(this).prop('name')] = $(this).prop('checked');
     });
-    console.log(columns);
 
-    chrome.extension.getBackgroundPage().testRequest();
-    // chrome.tabs.getSelected(null, function(tab) {
-    //     chrome.tabs.sendRequest(tab.id, {greeting: "hello"});
-    // });
+    chrome.extension.getBackgroundPage().testRequest(columns);
+    chrome.storage.local.set({"columns": columns}, function() {
+      if (chrome.runtime.lastError) {
+        alert('Error setting columns:\n' + chrome.runtime.lastError);
+      }
+    });
   }, false);
 }, false);
