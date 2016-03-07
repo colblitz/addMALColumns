@@ -1,14 +1,20 @@
-var express = require('express');
-var path = require('path');
-var favicon = require('serve-favicon');
-var logger = require('morgan');
+// Get stuff
+var express      = require('express');
+var path         = require('path');
+var favicon      = require('serve-favicon');
+var logger       = require('morgan');
 var cookieParser = require('cookie-parser');
-var bodyParser = require('body-parser');
-var mongoose       = require('mongoose');
+var bodyParser   = require('body-parser');
+var mongoose     = require('mongoose');
+var MongoStore   = require('connect-mongo')(expressSession);
+
+var User  = require('./models/user');
+var State = require('./models/state');
+
+// Configuration
+mongoose.connect('mongodb://localhost:27017/yatto');
 
 var routes = require('./routes/index');
-
-
 
 var app = express();
 
