@@ -6,10 +6,9 @@ var logger       = require('morgan');
 var cookieParser = require('cookie-parser');
 var bodyParser   = require('body-parser');
 var mongoose     = require('mongoose');
-var MongoStore   = require('connect-mongo')(expressSession);
 
-var User  = require('./models/user');
-var State = require('./models/state');
+var Anime = require('./models/anime');
+var Manga = require('./models/manga');
 
 // Configuration
 mongoose.connect('mongodb://localhost:27017/yatto');
