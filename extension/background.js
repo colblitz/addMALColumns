@@ -2,6 +2,12 @@
 
 function testRequest(columnsVar) {
     chrome.tabs.getSelected(null, function(tab) {
-    	chrome.tabs.sendMessage(tab.id, {columns: columnsVar});
+    	chrome.tabs.sendMessage(tab.id, {type: "columns", columns: columnsVar});
+    });
+}
+
+function testButton() {
+    chrome.tabs.getSelected(null, function(tab) {
+    	chrome.tabs.sendMessage(tab.id, {type: "test"});
     });
 }

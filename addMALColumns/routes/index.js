@@ -36,6 +36,11 @@ router.get('/json', function(req, res) {
 	sendJson(res, {json: "testjson"});
 });
 
+router.post('/requestAnime', function(req, res) {
+	console.log(req.body.ids);
+	sendSuccess(res, req.body.ids);
+});
+
 var scrapeAnime = function(id) {
     return $.ajax({
         url: "http://myanimelist.net/anime/" + id,

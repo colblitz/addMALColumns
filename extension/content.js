@@ -154,10 +154,26 @@ var alertFromContent = function(asdf) {
 
 chrome.runtime.onMessage.addListener(
   function(request, sender, sendResponse) {
-    console.log("got " + JSON.stringify(request.columns));
-    for (var colName in request.columns) {
-      console.log("want column " + colName + ": " + request.columns[colName]);
-      showColumn(colName, request.columns[colName]);
+    if (request.type == "columns") {
+      console.log("got " + JSON.stringify(request.columns));
+      for (var colName in request.columns) {
+        console.log("want column " + colName + ": " + request.columns[colName]);
+        showColumn(colName, request.columns[colName]);
+      }
+    } else if (request.type == "test") {
+      console.log("test");
+      $.ajax({
+        url: "/requestAnime",
+        type: "POST",
+        data: {ids: [1, 2, 3]},
+        success: function(data) {
+          console.log("response:");
+          console.log(data);
+        },
+        error: function() {
+          console.log("error");
+        }
+      });
     }
   }
 );

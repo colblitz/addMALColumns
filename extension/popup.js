@@ -23,4 +23,10 @@ document.addEventListener('DOMContentLoaded', function() {
       }
     });
   }, false);
+
+  // add functionality for button
+  var button2 = document.getElementById('button2');
+  button2.addEventListener('click', function() {
+    chrome.extension.getBackgroundPage().testButton();
+  }, false);
 }, false);
