@@ -38,7 +38,40 @@ router.get('/json', function(req, res) {
 
 router.post('/requestAnime', function(req, res) {
 	console.log(req.body.ids);
-	sendSuccess(res, req.body.ids);
+
+    Anime.find({}).where('id').in(req.body.ids).exec(function(err, anime) {
+        var notIn = req.body.ids.slice();
+
+        anime.forEach(function(a) {
+            console.log("retrieved anime: ");
+            console.log(a);
+            var index = notIn.indexOf(a.id);
+            if (index > -1) {
+                notIn.splice(index, 1);
+            }
+        });
+        console.log("not in: " + notIn);
+        notIn.forEach(function(id) {
+        //for (id in notIn) {
+            var newAnime = new Anime();
+            newAnime.id = id;
+            newAnime.title = "asdf";
+            newAnime.premiered = "alskdjf";
+            newAnime.studios = "alksjflajeflk";
+            newAnime.rank = 123;
+            newAnime.score = 15.1452;
+
+            newAnime.save(function(err) {
+                if (err) {
+                    console.log("Error saving anime: " + err);
+                    sendErrResponse(res, err);
+                    return;
+                }
+                console.log("Anime successfully saved");
+            });
+        });
+        sendSuccess(res, anime);
+    });
 });
 
 var scrapeAnime = function(id) {

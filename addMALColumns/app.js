@@ -11,7 +11,7 @@ var Anime = require('./models/anime');
 var Manga = require('./models/manga');
 
 // Configuration
-mongoose.connect('mongodb://localhost:27017/yatto');
+mongoose.connect('mongodb://localhost:27017/mal');
 
 var routes = require('./routes/index');
 
