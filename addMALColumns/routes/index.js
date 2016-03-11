@@ -1,9 +1,17 @@
 var express = require('express');
 var mongoose = require('mongoose');
-var jquery = require('jquery');
 var request = require('request');
 var Anime = require('../models/anime');
 var Manga = require('../models/manga');
+
+// look into https://github.com/cheeriojs/cheerio
+// var jsdom = require('jsdom').jsdom
+//   , myWindow = jsdom().createWindow()
+//   , $ = require('jQuery')
+//   , jq = require('jQuery').create()
+//   , jQuery = require('jQuery').create(myWindow)
+//   ;
+
 var router = express.Router();
 
 var sendSuccess = function(res, content) {
@@ -83,11 +91,14 @@ var scrapeAnime = function(id) {
     // request module is used to process the yql url and return the results in JSON format
     var url = "http://myanimelist.net/anime/" + id;
 
+
+
     console.log("url: " + url);
     request(url, function(err, resp, body) {
         console.log(body);
 
-        var a = jquery.parseXML(body);
+        // var a = jquery.parseXML(body);
+        // var a = $.parseXML(body);
         // body = JSON.parse(body);
         // logic used to compare search results with the input from user
         // if (!body.query.results.RDF.item) {
@@ -97,7 +108,7 @@ var scrapeAnime = function(id) {
         // }
     });
 
-    // return ajax({
+    // $.ajax({
     //     url: "http://myanimelist.net/anime/" + id,
     //     type: 'GET',
     //     dataType: "html",
