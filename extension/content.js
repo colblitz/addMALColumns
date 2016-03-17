@@ -36,6 +36,7 @@ var getListIds = function() {
 };
 
 var ids = getListIds();
+console.log(ids);
 
 var getData = function(ids) {
 

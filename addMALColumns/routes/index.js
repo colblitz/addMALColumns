@@ -1,6 +1,7 @@
 var express = require('express');
 var mongoose = require('mongoose');
 var request = require('request');
+var cheerio = require('cheerio');
 var Anime = require('../models/anime');
 var Manga = require('../models/manga');
 
@@ -61,17 +62,18 @@ router.post('/requestAnime', function(req, res) {
             }
         });
         console.log("not in: " + notIn);
+        console.log("start scrape: ", new Date().getTime());
         notIn.forEach(function(id) {
         //for (id in notIn) {
             scrapeAnime(id);
             //console.log(parseAnimeInfo(scrapeAnime(id)));
-            var newAnime = new Anime();
-            newAnime.id = id;
-            newAnime.title = "asdf";
-            newAnime.premiered = "alskdjf";
-            newAnime.studios = "alksjflajeflk";
-            newAnime.rank = 123;
-            newAnime.score = 15.1452;
+            // var newAnime = new Anime();
+            // newAnime.id = id;
+            // newAnime.title = "asdf";
+            // newAnime.premiered = "alskdjf";
+            // newAnime.studios = "alksjflajeflk";
+            // newAnime.rank = 123;
+            // newAnime.score = 15.1452;
 
             // newAnime.save(function(err) {
             //     if (err) {
@@ -82,20 +84,21 @@ router.post('/requestAnime', function(req, res) {
             //     console.log("Anime successfully saved");
             // });
         });
+        console.log("end scrape: ", new Date().getTime());
         sendSuccess(res, anime);
     });
 });
+
 
 var scrapeAnime = function(id) {
     console.log("scraping: " + id + "--------------------------------------------------------------------------------");
     // request module is used to process the yql url and return the results in JSON format
     var url = "http://myanimelist.net/anime/" + id;
 
-
-
     console.log("url: " + url);
     request(url, function(err, resp, body) {
-        console.log(body);
+        //console.log(body);
+        parseAnimeInfo(body);
 
         // var a = jquery.parseXML(body);
         // var a = $.parseXML(body);
@@ -123,12 +126,20 @@ var scrapeAnime = function(id) {
 }
 
 var parseAnimeInfo = function(data) {
-    var stat_1 = $($(data.responseText).find("span:contains('Premiered')")[0]).next().text();
-    var stat_2 = $($(data.responseText).find("span:contains('Studios')")[0]).next().text();
-    var stat_3 = $($(data.responseText).find("span:contains('Ranked')")[0]).next().text();
-    var stat_4 = $($(data.responseText).find("span:contains('Score')")[0]).next().text();
+    var $ = cheerio.load(data);
+    var stat_1 = $($("span:contains('Premiered')")[0]).next().text();
+    var stat_2 = $($("span:contains('Studios')")[0]).next().text();
+    var stat_3 = $($("span:contains('Ranked')")[0]).next().text();
+    var stat_4 = $($("span:contains('Score')")[0]).next().text();
     console.log([stat_1, stat_2, stat_3, stat_4]);
     return [stat_1, stat_2, stat_3, stat_4];
+
+    // var stat_1 = $($(data.responseText).find("span:contains('Premiered')")[0]).next().text();
+    // var stat_2 = $($(data.responseText).find("span:contains('Studios')")[0]).next().text();
+    // var stat_3 = $($(data.responseText).find("span:contains('Ranked')")[0]).next().text();
+    // var stat_4 = $($(data.responseText).find("span:contains('Score')")[0]).next().text();
+    // console.log([stat_1, stat_2, stat_3, stat_4]);
+    // return [stat_1, stat_2, stat_3, stat_4];
 }
 
 module.exports = router;
