@@ -2,12 +2,13 @@ var mongoose = require('mongoose');
 var Schema = mongoose.Schema;
 
 var Anime = Schema({
-	id: {type: Number, unique: true},
+	malid: {type: Number, unique: true},
 	title: String,
 	premiered: String,
 	studios: String,
 	rank: Number,
-	score: Number
+	score: Number,
+	time: { type: Date, default: Date.now }
 });
 
 module.exports = mongoose.model('Anime', Anime);

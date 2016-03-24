@@ -7,15 +7,9 @@ var async = require("async");
 var Anime = require('../models/anime');
 var Manga = require('../models/manga');
 
-// look into https://github.com/cheeriojs/cheerio
-// var jsdom = require('jsdom').jsdom
-//   , myWindow = jsdom().createWindow()
-//   , $ = require('jQuery')
-//   , jq = require('jQuery').create()
-//   , jQuery = require('jQuery').create(myWindow)
-//   ;
-
 var router = express.Router();
+
+var MAXDIFF = 1000 * 60;// 1000 * 60 * 60 * 24; // milliseconds in a day
 
 var sendSuccess = function(res, content) {
 	res.status(200).json({
@@ -49,256 +43,45 @@ router.get('/json', function(req, res) {
 	sendJson(res, {json: "testjson"});
 });
 
-
-// router.get('/text', function(req, res) {
-//   async.parallel(
-//     [function(cb){ process(one, cb); },
-//      function(cb){ process(two, cb); },
-//      function(cb){ process(three, cb); }],
-//     function(err, results) {
-//       if (err) {
-//         res.status(400).end();
-//         return;
-//       } else {
-//         console.log("am all done");
-//         res.status(200).json({
-//           success: true,
-//           results: results
-//         }).end();
-//       }
-//     }
-//   );
-// });
-
-// var process = function(x, cb) {
-//   var url = "http://endpointOnOtherServer/" + x;
-//   request(url, function(err, resp, body) {
-//     if (err) {
-//       cb(err);
-//     } else {
-//       var r = parseBody(body);
-//       saveResult(r, cb);
-//     }
-//   });
-// };
-
-// var parseBody = function(x) {
-//   // doStuff
-//   return r;
-// };
-
-// var saveResult = function(r, cb) {
-//   // doStuff
-
-// var makeScrapeFunction = function(id, callback) {
-//     return function(callback) {
-//         scrapeAnime(id, callback);
-
-
-//         // var id = toDeleteIds[i];
-//         // console.log(id);
-//         // Comment.findOne({_id:id}, function(err, found){
-//         //     if (!err) found.remove(callback);
-//         // });
-//      };
-// }
-
 router.post('/requestAnime', function(req, res) {
 	console.log(req.body.ids);
 
-    Anime.find({}).where('id').in(req.body.ids).exec(function(err, anime) {
-        var notIn = req.body.ids.slice();
+    Anime.find({}).where('malid').in(req.body.ids).exec(function(err, anime) {
+        var now = new Date();
 
+        var toGet = req.body.ids.slice();
+        var toReturn = {};
         anime.forEach(function(a) {
-            console.log("retrieved anime: ", a.id);
-            var index = notIn.indexOf(a.id);
-            if (index > -1) {
-                notIn.splice(index, 1);
+            console.log("retrieved anime: ", a.malid);
+            toReturn[a.malid] = a;
+            var index = toGet.indexOf(a.malid);
+
+            if (index > -1 && (now - a.time < MAXDIFF)) {
+                toGet.splice(index, 1);
             }
         });
-        console.log("not in: " + notIn);
-        console.log("start scrape: ", new Date().getTime());
-
-
-
+        var start = new Date().getTime();
 
         var scrapeFunction = function(id, callback) {
             console.log("scrapeFunction: ", id);
             scrapeAnime(id, callback);
         }
 
-        async.forEach(notIn, scrapeFunction, function(err, results) {
+        async.map(toGet, scrapeFunction, function(err, results) {
             if (err) {
                 console.log("errors:", err);
             } else {
                 console.log("no errors");
-                console.log("end scrape: ", new Date().getTime());
-                sendSuccess(res, anime);
+                console.log("results: ", results);
+                results.forEach(function(a) {
+                    toReturn[a.malid] = a;
+                });
+                sendSuccess(res, {time: new Date().getTime() - start, anime: toReturn});
                 return;
             }
         });
-
-
-
-
-        // var scrapeFunctions = [];
-        // notIn.forEach(function(id) {
-        //     scrapeFunctions.push(makeScrapeFunction(id, callback));
-        // });
-
-        // async.parallel(scrapeFunctions, function(err, results) {
-        //     if (err) {
-        //         console.log("errors:", err);
-        //     } else {
-        //         console.log("no errors");
-        //         console.log("end scrape: ", new Date().getTime());
-        //         sendSuccess(res, anime);
-        //         return;
-        //     }
-        // });
-
-//     async.parallel(
-//         deleteFunctions,
-//         function(err,results) {
-//             exports.comments(req, res); //render a view
-//         }
-//     );
-// };
-
-//         async.parallel()
-
-// async.parallel([
-//     function(callback){
-//         setTimeout(function(){
-//             callback(null, 'one');
-//         }, 200);
-//     },
-//     function(callback){
-//         setTimeout(function(){
-//             callback(null, 'two');
-//         }, 100);
-//     }
-// ],
-// // optional callback
-// function(err, results){
-//     // the results array will equal ['one','two'] even though
-//     // the second function had a shorter timeout.
-// });
-
-
-        // async.forEachOf(notIn, function (value, key, callback) {
-        //     scrapeAnime(value, function(stats) {
-
-        //         return;
-        //     });
-        //     return;
-
-
-        //     // fs.readFile(__dirname + value, "utf8", function (err, data) {
-        //     //     if (err) return callback(err);
-        //     //     try {
-        //     //         configs[key] = JSON.parse(data);
-        //     //     } catch (e) {
-        //     //         return callback(e);
-        //     //     }
-        //     //     callback();
-        //     // });
-        // }, function (err) {
-        //     if (err) {
-        //         console.log("alksdjfd");
-        //         console.log(err);
-        //         sendErrResponse(res, err);
-        //         return;
-        //     }
-        //     // if (err) console.error(err.message);
-        //     // // configs is now a map of JSON data
-        //     // doSomethingWith(configs);
-        //     console.log("end scrape: ", new Date().getTime());
-        //     sendSuccess(res, anime);
-        //     return;
-        // });
-
-        // console.log("lkjasdf");
-
-
-
-
-
-        // notIn.forEach(function(id) {
-        // //for (id in notIn) {
-        //     var stats = scrapeAnime(id);
-        //     console.log(stats);
-
-        //     var newAnime = new Anime();
-        //     newAnime.id = id;
-        //     newAnime.title = stats.name;
-        //     newAnime.premiered = stats.premiered;
-        //     newAnime.studios = stats.studio;
-        //     newAnime.rank = stats.rank;
-        //     newAnime.score = stats.score;
-
-        //     newAnime.save(function(err) {
-        //         if (err) {
-        //             console.log("Error saving anime:");
-        //             console.log(newAnime);
-        //             console.log(err);
-        //             sendErrResponse(res, err);
-        //             return;
-        //         }
-        //         //console.log("Anime successfully saved");
-        //     });
-        // });
-        // console.log("end scrape: ", new Date().getTime());
-        // sendSuccess(res, anime);
     });
 });
-
-
-// var fetch = function(file,cb){
-//      request.get(file, function(err,response,body){
-//            if ( err){
-//                  cb(err);
-//            } else {
-//                  cb(null, body); // First param indicates error, null=> no error
-//            }
-//      });
-// // }
-// async.map(["file1", "file2", "file3"], fetch, function(err, results){
-//     if ( err){
-//        // either file1, file2 or file3 has raised an error, so you should not use results and handle the error
-//     } else {
-//        // results[0] -> "file1" body
-//        // results[1] -> "file2" body
-//        // results[2] -> "file3" body
-//     }
-// });
-
-
-
-var saveAnime = function(id, stats, callback) {
-    console.log("saving anime with stats: ", stats);
-
-    var newAnime = new Anime();
-    newAnime.id = id;
-    newAnime.title = stats.name;
-    newAnime.premiered = stats.premiered;
-    newAnime.studios = stats.studio;
-    newAnime.rank = Number(stats.rank);
-    newAnime.score = Number(stats.score);
-
-    newAnime.save(function(err) {
-        if (err) {
-            console.log("Error saving anime:");
-            console.log(newAnime);
-            console.log(err);
-            callback(err);
-        } else {
-            console.log("Anime successfully saved");
-            callback(null, newAnime.id);
-        }
-    });
-}
-
 
 var scrapeAnime = function(id, callback) {
     var url = "http://myanimelist.net/anime/" + id;
@@ -308,9 +91,91 @@ var scrapeAnime = function(id, callback) {
             callback(err);
         } else {
             saveAnime(id, parseAnimeInfo(body), callback);
-            // callback(null, body);
         }
     });
+}
+
+var saveAnime = function(id, stats, callback) {
+    console.log("saving anime with stats: ", stats);
+
+    var newAnime = new Anime({
+        malid: id,
+        title: stats.name,
+        premiered: stats.premiered,
+        studios: stats.studio,
+        rank: Number(stats.rank),
+        score: Number(stats.score)
+    });
+
+    // MyModel.findOneAndUpdate(query, req.newData, {upsert:true}, function(err, doc){
+    //     if (err) return res.send(500, { error: err });
+    //     return res.send("succesfully saved");
+    // });
+
+    var newAnimeData = newAnime.toObject();
+    delete newAnimeData._id;
+
+    // Anime.update({_id: newAnime._id}, newAnimeData, {upsert: true}, function(err, anime) {
+    //     if (err) {
+    //         console.log("Error saving anime:");
+    //         console.log(newAnime);
+    //         console.log(err);
+    //         callback(err);
+    //     } else {
+    //         console.log("Anime successfully saved");
+    //         console.log(anime);
+    //         callback(null, anime);
+    //     }
+    // });
+
+    // var query = {'username':req.user.username};
+    // req.newData.username = req.user.username;
+    // MyModel.findOneAndUpdate(query, req.newData, {upsert:true}, function(err, doc){
+    //     if (err) return res.send(500, { error: err });
+    //     return res.send("succesfully saved");
+    // });
+
+// var contact = new Contact({
+//   phone: request.phone,
+//   status: request.status
+// });
+
+// // Convert the Model instance to a simple object using Model's 'toObject' function
+// // to prevent weirdness like infinite looping...
+// var upsertData = contact.toObject();
+
+// // Delete the _id property, otherwise Mongo will return a "Mod on _id not allowed" error
+// delete upsertData._id;
+
+// // Do the upsert, which works like this: If no Contact document exists with
+// // _id = contact.id, then create a new doc using upsertData.
+// // Otherwise, update the existing doc with upsertData
+// Contact.update({_id: contact.id}, upsertData, {upsert: true}, function(err{...});
+
+    Anime.findOneAndUpdate({'malid': id}, newAnimeData, {upsert:true, new:true}, function(err, anime) {
+        if (err) {
+            console.log("Error saving anime:");
+            console.log(err);
+            callback(err);
+        } else {
+            console.log("Anime successfully saved");
+            console.log(anime);
+            callback(null, anime);
+        }
+    });
+
+    // newAnime.save(function(err) {
+    //     if (err) {
+    //         console.log("Error saving anime:");
+    //         console.log(newAnime);
+    //         console.log(err);
+    //         callback(err);
+    //     } else {
+    //         console.log("Anime successfully saved");
+    //         console.log(newAnime);
+    //         callback(null, newAnime);
+    //     }
+    // });
 }
 
 var parseAnimeInfo = function(data) {
