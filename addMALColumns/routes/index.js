@@ -49,6 +49,60 @@ router.get('/json', function(req, res) {
 	sendJson(res, {json: "testjson"});
 });
 
+
+// router.get('/text', function(req, res) {
+//   async.parallel(
+//     [function(cb){ process(one, cb); },
+//      function(cb){ process(two, cb); },
+//      function(cb){ process(three, cb); }],
+//     function(err, results) {
+//       if (err) {
+//         res.status(400).end();
+//         return;
+//       } else {
+//         console.log("am all done");
+//         res.status(200).json({
+//           success: true,
+//           results: results
+//         }).end();
+//       }
+//     }
+//   );
+// });
+
+// var process = function(x, cb) {
+//   var url = "http://endpointOnOtherServer/" + x;
+//   request(url, function(err, resp, body) {
+//     if (err) {
+//       cb(err);
+//     } else {
+//       var r = parseBody(body);
+//       saveResult(r, cb);
+//     }
+//   });
+// };
+
+// var parseBody = function(x) {
+//   // doStuff
+//   return r;
+// };
+
+// var saveResult = function(r, cb) {
+//   // doStuff
+
+// var makeScrapeFunction = function(id, callback) {
+//     return function(callback) {
+//         scrapeAnime(id, callback);
+
+
+//         // var id = toDeleteIds[i];
+//         // console.log(id);
+//         // Comment.findOne({_id:id}, function(err, found){
+//         //     if (!err) found.remove(callback);
+//         // });
+//      };
+// }
+
 router.post('/requestAnime', function(req, res) {
 	console.log(req.body.ids);
 
@@ -65,58 +119,106 @@ router.post('/requestAnime', function(req, res) {
         console.log("not in: " + notIn);
         console.log("start scrape: ", new Date().getTime());
 
-async.parallel([
-    function(callback){
-        setTimeout(function(){
-            callback(null, 'one');
-        }, 200);
-    },
-    function(callback){
-        setTimeout(function(){
-            callback(null, 'two');
-        }, 100);
-    }
-],
-// optional callback
-function(err, results){
-    // the results array will equal ['one','two'] even though
-    // the second function had a shorter timeout.
-});
 
 
-        async.forEachOf(notIn, function (value, key, callback) {
-            scrapeAnime(value, function(stats) {
 
-                return;
-            });
-            return;
+        var scrapeFunction = function(id, callback) {
+            console.log("scrapeFunction: ", id);
+            scrapeAnime(id, callback);
+        }
 
-
-            // fs.readFile(__dirname + value, "utf8", function (err, data) {
-            //     if (err) return callback(err);
-            //     try {
-            //         configs[key] = JSON.parse(data);
-            //     } catch (e) {
-            //         return callback(e);
-            //     }
-            //     callback();
-            // });
-        }, function (err) {
+        async.forEach(notIn, scrapeFunction, function(err, results) {
             if (err) {
-                console.log("alksdjfd");
-                console.log(err);
-                sendErrResponse(res, err);
+                console.log("errors:", err);
+            } else {
+                console.log("no errors");
+                console.log("end scrape: ", new Date().getTime());
+                sendSuccess(res, anime);
                 return;
             }
-            // if (err) console.error(err.message);
-            // // configs is now a map of JSON data
-            // doSomethingWith(configs);
-            console.log("end scrape: ", new Date().getTime());
-            sendSuccess(res, anime);
-            return;
         });
 
-        console.log("lkjasdf");
+
+
+
+        // var scrapeFunctions = [];
+        // notIn.forEach(function(id) {
+        //     scrapeFunctions.push(makeScrapeFunction(id, callback));
+        // });
+
+        // async.parallel(scrapeFunctions, function(err, results) {
+        //     if (err) {
+        //         console.log("errors:", err);
+        //     } else {
+        //         console.log("no errors");
+        //         console.log("end scrape: ", new Date().getTime());
+        //         sendSuccess(res, anime);
+        //         return;
+        //     }
+        // });
+
+//     async.parallel(
+//         deleteFunctions,
+//         function(err,results) {
+//             exports.comments(req, res); //render a view
+//         }
+//     );
+// };
+
+//         async.parallel()
+
+// async.parallel([
+//     function(callback){
+//         setTimeout(function(){
+//             callback(null, 'one');
+//         }, 200);
+//     },
+//     function(callback){
+//         setTimeout(function(){
+//             callback(null, 'two');
+//         }, 100);
+//     }
+// ],
+// // optional callback
+// function(err, results){
+//     // the results array will equal ['one','two'] even though
+//     // the second function had a shorter timeout.
+// });
+
+
+        // async.forEachOf(notIn, function (value, key, callback) {
+        //     scrapeAnime(value, function(stats) {
+
+        //         return;
+        //     });
+        //     return;
+
+
+        //     // fs.readFile(__dirname + value, "utf8", function (err, data) {
+        //     //     if (err) return callback(err);
+        //     //     try {
+        //     //         configs[key] = JSON.parse(data);
+        //     //     } catch (e) {
+        //     //         return callback(e);
+        //     //     }
+        //     //     callback();
+        //     // });
+        // }, function (err) {
+        //     if (err) {
+        //         console.log("alksdjfd");
+        //         console.log(err);
+        //         sendErrResponse(res, err);
+        //         return;
+        //     }
+        //     // if (err) console.error(err.message);
+        //     // // configs is now a map of JSON data
+        //     // doSomethingWith(configs);
+        //     console.log("end scrape: ", new Date().getTime());
+        //     sendSuccess(res, anime);
+        //     return;
+        // });
+
+        // console.log("lkjasdf");
 
 
 
@@ -160,24 +262,24 @@ function(err, results){
 //                  cb(null, body); // First param indicates error, null=> no error
 //            }
 //      });
-// }
-async.map(["file1", "file2", "file3"], fetch, function(err, results){
-    if ( err){
-       // either file1, file2 or file3 has raised an error, so you should not use results and handle the error
-    } else {
-       // results[0] -> "file1" body
-       // results[1] -> "file2" body
-       // results[2] -> "file3" body
-    }
-});
+// // }
+// async.map(["file1", "file2", "file3"], fetch, function(err, results){
+//     if ( err){
+//        // either file1, file2 or file3 has raised an error, so you should not use results and handle the error
+//     } else {
+//        // results[0] -> "file1" body
+//        // results[1] -> "file2" body
+//        // results[2] -> "file3" body
+//     }
+// });
 
 
 
-var saveAnime = function(stats) {
+var saveAnime = function(id, stats, callback) {
     console.log("saving anime with stats: ", stats);
 
     var newAnime = new Anime();
-    newAnime.id = value;
+    newAnime.id = id;
     newAnime.title = stats.name;
     newAnime.premiered = stats.premiered;
     newAnime.studios = stats.studio;
@@ -189,10 +291,10 @@ var saveAnime = function(stats) {
             console.log("Error saving anime:");
             console.log(newAnime);
             console.log(err);
-            return err;
+            callback(err);
         } else {
             console.log("Anime successfully saved");
-            return null;
+            callback(null, newAnime.id);
         }
     });
 }
@@ -203,11 +305,10 @@ var scrapeAnime = function(id, callback) {
     console.log("scraping: " + url);
     request(url, function(err, resp, body) {
         if (err) {
-            // err
+            callback(err);
         } else {
-            var stats = parseAnimeInfo(body);
-
-            callback(body);
+            saveAnime(id, parseAnimeInfo(body), callback);
+            // callback(null, body);
         }
     });
 }
