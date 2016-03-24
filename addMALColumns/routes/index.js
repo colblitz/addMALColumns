@@ -9,7 +9,7 @@ var Manga = require('../models/manga');
 
 var router = express.Router();
 
-var MAXDIFF = 1000 * 60;// 1000 * 60 * 60 * 24; // milliseconds in a day
+var MAXDIFF = 1000 * 60 * 60 * 24; // milliseconds in a day
 
 var sendSuccess = function(res, content) {
 	res.status(200).json({
@@ -34,15 +34,6 @@ router.get('/', function(req, res, next) {
  	res.render('index', { title: 'Express' });
 });
 
-router.get('/test', function(req, res) {
-	var test = {blah: "alskdjf"};
-	sendSuccess(res, test);
-});
-
-router.get('/json', function(req, res) {
-	sendJson(res, {json: "testjson"});
-});
-
 router.post('/requestAnime', function(req, res) {
 	console.log(req.body.ids);
 
@@ -56,6 +47,7 @@ router.post('/requestAnime', function(req, res) {
             toReturn[a.malid] = a;
             var index = toGet.indexOf(a.malid);
 
+            // If we have the data and it's not too old, remove from toGet list
             if (index > -1 && (now - a.time < MAXDIFF)) {
                 toGet.splice(index, 1);
             }
@@ -107,50 +99,8 @@ var saveAnime = function(id, stats, callback) {
         score: Number(stats.score)
     });
 
-    // MyModel.findOneAndUpdate(query, req.newData, {upsert:true}, function(err, doc){
-    //     if (err) return res.send(500, { error: err });
-    //     return res.send("succesfully saved");
-    // });
-
     var newAnimeData = newAnime.toObject();
     delete newAnimeData._id;
-
-    // Anime.update({_id: newAnime._id}, newAnimeData, {upsert: true}, function(err, anime) {
-    //     if (err) {
-    //         console.log("Error saving anime:");
-    //         console.log(newAnime);
-    //         console.log(err);
-    //         callback(err);
-    //     } else {
-    //         console.log("Anime successfully saved");
-    //         console.log(anime);
-    //         callback(null, anime);
-    //     }
-    // });
-
-    // var query = {'username':req.user.username};
-    // req.newData.username = req.user.username;
-    // MyModel.findOneAndUpdate(query, req.newData, {upsert:true}, function(err, doc){
-    //     if (err) return res.send(500, { error: err });
-    //     return res.send("succesfully saved");
-    // });
-
-// var contact = new Contact({
-//   phone: request.phone,
-//   status: request.status
-// });
-
-// // Convert the Model instance to a simple object using Model's 'toObject' function
-// // to prevent weirdness like infinite looping...
-// var upsertData = contact.toObject();
-
-// // Delete the _id property, otherwise Mongo will return a "Mod on _id not allowed" error
-// delete upsertData._id;
-
-// // Do the upsert, which works like this: If no Contact document exists with
-// // _id = contact.id, then create a new doc using upsertData.
-// // Otherwise, update the existing doc with upsertData
-// Contact.update({_id: contact.id}, upsertData, {upsert: true}, function(err{...});
 
     Anime.findOneAndUpdate({'malid': id}, newAnimeData, {upsert:true, new:true}, function(err, anime) {
         if (err) {
@@ -163,19 +113,6 @@ var saveAnime = function(id, stats, callback) {
             callback(null, anime);
         }
     });
-
-    // newAnime.save(function(err) {
-    //     if (err) {
-    //         console.log("Error saving anime:");
-    //         console.log(newAnime);
-    //         console.log(err);
-    //         callback(err);
-    //     } else {
-    //         console.log("Anime successfully saved");
-    //         console.log(newAnime);
-    //         callback(null, newAnime);
-    //     }
-    // });
 }
 
 var parseAnimeInfo = function(data) {
