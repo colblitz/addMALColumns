@@ -61,8 +61,9 @@ var getData = function(ids) {
     url: "http://www.malcolumns.site/requestData",
     data: {"ids": ids, "type": type},
     success: function(data) {
-      console.log("got data: ", data);
+      console.log("got data: ", data.content.data);
       listData = data.content.data;
+      fillInColumns();
     }
   });
 };
@@ -79,12 +80,22 @@ var columnToField = {
   "author": "author"
 };
 
+var fillInColumns = function() {
+  console.log("filling in columns");
+  for (id in listData) {
+    for (cName in columns) {
+      console.log(cName, id);
+      console.log(columns[cName][id]);
+      columns[cName][id].text(listData[id][columnToField[cName]]);
+    }
+  }
+};
 
 var getDataForColumn = function(id, column) {
   var field = columnToField[column];
-  console.log("gettingDataForColumn: ", id, " ", column, " ", field);
+  // console.log("gettingDataForColumn: ", id, " ", column, " ", field);
   if (listData != null) {
-    console.log(listData[id]);
+    // console.log(listData[id]);
     return listData[id][field];
   } else {
     console.log("null list data");
@@ -95,7 +106,7 @@ var getDataForColumn = function(id, column) {
 var addColumn = function(name) {
     // adjust table width;
     // $("#list_surround").width(1100);
-    var allItems = []
+    var allItems = {}
     // add columns
     if (isNewList) {
         var headerRow = $("tr.list-table-header");
@@ -104,8 +115,11 @@ var addColumn = function(name) {
         var tableRows = $("tr.list-table-data");
         tableRows.map(function(i, el) {
             var id = parseInt($(el).next().attr('id').replace("more-", ""));
+            // var data = id;
             var data = getDataForColumn(id, name);
-            $(el).append('<td class="data-' + name + '">' + data + '</td>');
+            var newCell = $('<td class="data-' + name + '">' + data + '</td>');
+            allItems[id] = newCell;
+            $(el).append(newCell);
         });
     } else {
         var headers = $('[class^=header_');
@@ -116,7 +130,8 @@ var addColumn = function(name) {
 
             var newCell = $('<td class="table_header" width="90" align="center" nowrap=""><strong>' + name.capitalizeFirstLetter() + '</strong></td>');
             headerRow.append(newCell);
-            allItems.push(newCell);
+            // TODO: ??
+            // allItems.push(newCell);
         })
 
         var more = $('[id^=more');
@@ -131,7 +146,7 @@ var addColumn = function(name) {
             var data = getDataForColumn(id, name);
             var newCell = $('<td class="' + tdType + '" align="center" width="90"><span id="">' + data + '</span></td>');
             rowRow.append(newCell);
-            allItems.push(newCell);
+            allItems[id] = newCell;
         })
     }
 
@@ -140,7 +155,7 @@ var addColumn = function(name) {
 
 var showColumn = function(colName, show) {
   console.log("showing column: " + colName);
-  console.log(columns);
+  // console.log(columns);
   if (colName in columns) {
     if (show) {
       columns[colName].forEach(function(el, i) {
@@ -172,17 +187,16 @@ var showColumn = function(colName, show) {
 // showColumn("rank", false);
 
 setTimeout(function(){
-    //addColumn('Score', 'score');
-    addColumn("season");
-addColumn("studio");
-addColumn("score");
-addColumn("rank");
+  addColumn("season");
+  addColumn("studio");
+  addColumn("score");
+  addColumn("rank");
 
-showColumn("season", false);
-showColumn("studio", false);
-showColumn("score", false);
-showColumn("rank", false);
-}, 1000);
+  showColumn("season", false);
+  showColumn("studio", false);
+  showColumn("score", false);
+  showColumn("rank", false);
+}, 500);
 
 var sortColumn = function(name) {
     // http://stackoverflow.com/questions/7831712/jquery-sort-divs-by-innerhtml-of-children
