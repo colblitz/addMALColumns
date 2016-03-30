@@ -46,10 +46,11 @@ var getDb = function(type) {
 
 
 router.post('/requestData', function(req, res) {
+    console.log(req.body);
 	console.log(req.body.ids);
 
     var type = req.body.type;
-    var ids = req.body.ids;
+    var ids = req.body.ids.map(function(a) { return Number(a); });
 
     var db = getDb(type);
     var scrapeFunction = function(id, callback) {

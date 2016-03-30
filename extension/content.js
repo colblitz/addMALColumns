@@ -14,10 +14,12 @@ if (!window.jQuery) {
 console.log(window.location.href);
 
 var isAnimeList = true;
+var type = "anime";
 
 var testType = function() {
     if (window.location.href.includes("mangalist")) {
         isAnimeList = false;
+        type = "manga";
     }
 }
 
@@ -49,7 +51,19 @@ var ids = getListIds();
 console.log(ids);
 
 var getData = function(ids) {
-
+  console.log("data:");
+  console.log({"ids": ids, "type": type});
+  // TODO: fix de-param-ing in server
+  // http://benalman.com/news/2009/12/jquery-14-param-demystified/
+  $.ajaxSetup({ traditional: true });
+  $.ajax({
+    type: 'POST',
+    url: "http://www.malcolumns.site/requestData",
+    data: {"ids": ids, "type": type},
+    success: function(data) {
+      console.log("got data: ", data);
+    }
+  });
 };
 
 var listData = getData(ids);
