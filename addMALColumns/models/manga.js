@@ -2,11 +2,12 @@ var mongoose = require('mongoose');
 var Schema = mongoose.Schema;
 
 var Manga = Schema({
-	id: {type: Number, unique: true},
+	malid: {type: Number, unique: true},
 	title: String,
 	author: String,
 	rank: Number,
-	score: Number
+	score: Number,
+	time: { type: Date, default: Date.now }
 });
 
 module.exports = mongoose.model('Manga', Manga);

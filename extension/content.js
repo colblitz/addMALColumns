@@ -11,6 +11,16 @@ if (!window.jQuery) {
     console.log("yeah has jquery");
 }
 
+console.log(window.location.href);
+
+var isAnimeList = true;
+
+var testType = function() {
+    if (window.location.href.includes("mangalist")) {
+        isAnimeList = false;
+    }
+}
+
 var testNewList = function() {
     if ($(".header-menu").length) {
         console.log("has header menu");
@@ -89,13 +99,6 @@ var addColumn = function(name) {
         })
     }
 
-    // allItems.forEach(function(el, i) {
-    //   console.log('---');
-    //   console.log(i);
-    //   console.log(el);
-    //   console.log($(el));
-    //   console.log($(el).text());
-    // });
     columns[name] = allItems;
 }
 
@@ -144,15 +147,6 @@ var alertFromContent = function(asdf) {
     alert(asdf);
 };
 
-// chrome.runtime.onMessage.addListener(function callback)
-// chrome.runtime.onMessage.addListener(
-//     function(request, sender, sendResponse) {
-//         console.log("alksjdflkajsdflkjalsdfjlajdlkf");
-//         if (request.greeting == "hello")
-//         alert("hello background");
-//     }
-// );
-
 chrome.runtime.onMessage.addListener(
   function(request, sender, sendResponse) {
     if (request.type == "columns") {
@@ -178,27 +172,3 @@ chrome.runtime.onMessage.addListener(
     }
   }
 );
-
-var scrapeAnime = function(id) {
-    return $.ajax({
-        url: "http://myanimelist.net/anime/" + id,
-        type: 'GET',
-        dataType: "html",
-        success: function (data) {
-            return data;
-        },
-        error: function () {
-            console.log("error");
-        }
-    });
-}
-
-var parseAnimeInfo = function(data) {
-    var stat_1 = $($(data.responseText).find("span:contains('Premiered')")[0]).next().text();
-    var stat_2 = $($(data.responseText).find("span:contains('Studios')")[0]).next().text();
-    var stat_3 = $($(data.responseText).find("span:contains('Ranked')")[0]).next().text();
-    var stat_4 = $($(data.responseText).find("span:contains('Score')")[0]).next().text();
-    return [stat_1, stat_2, stat_3, stat_4];
-}
-
-//var ddd = scrapeAnime(27631);
