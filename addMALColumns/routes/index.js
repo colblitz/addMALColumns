@@ -63,7 +63,7 @@ router.post('/requestData', function(req, res) {
         var toReturn = {};
         objects.forEach(function(a) {
             console.log("retrieved " + type + ": ", a.malid);
-            toReturn[a.malid] = a;
+            toReturn[a.malid] = stripped(type, a);
             var index = toGet.indexOf(a.malid);
 
             // If we have the data and it's not too old, remove from toGet list
@@ -72,19 +72,25 @@ router.post('/requestData', function(req, res) {
             }
         });
         var start = new Date().getTime();
-
         async.map(toGet, scrapeFunction, function(err, results) {
             if (err) {
                 console.log("errors:", err);
             } else {
                 console.log("no errors");
                 console.log("results: ", results);
+                var i = 0;
                 results.forEach(function(a) {
                     if (a != null) {
                         toReturn[a.malid] = a;
+                        i++;
                     }
                 });
-                sendSuccess(res, {time: new Date().getTime() - start, data: toReturn});
+                sendSuccess(res, {
+                    time: new Date().getTime() - start,
+                    attempted: toGet.length,
+                    scraped: i,
+                    data: toReturn
+                });
                 return;
             }
         });
@@ -101,7 +107,7 @@ var scrape = function(id, type, callback) {
             if (err) {
                 callback(err);
             } else {
-                save(id, type, parseInfo(type, body), callback);
+                save(id, type, parseInfo(body), callback);
             }
         }
     });
@@ -130,6 +136,8 @@ var save = function(id, type, info, callback) {
         });
     }
 
+    console.log("newThing: ", newThing);
+
     var newThingData = newThing.toObject();
     delete newThingData._id;
 
@@ -141,142 +149,60 @@ var save = function(id, type, info, callback) {
         } else {
             console.log(type + " successfully saved");
             console.log(thing);
-            callback(null, thing);
+            callback(null, stripped(type, thing));
         }
     });
 };
 
-var parseInfo = function(type, data) {
+var stripped = function(type, thing) {
     if (type == "anime") {
-        return parseAnimeInfo(data);
+        return {
+            malid: thing.malid,
+            title: thing.title,
+            premiered: thing.premiered,
+            studios: thing.studios,
+            rank: thing.rank,
+            score: thing.score
+        };
     } else if (type == "manga") {
-        return parseMangaInfo(data);
+        return {
+            malid: thing.malid,
+            title: thing.title,
+            author: thing.author,
+            rank: thing.rank,
+            score: thing.score
+        };
     }
+};
+
+var parseInfo = function(data) {
+    console.log("parsing");
+    var $ = cheerio.load(data);
+    // both
+    var name = $($('span[itemprop="name"]')[0]).text();
+    var rank = $($("span:contains('Ranked:')")[0]).parent().contents().filter(function() {
+        return this.nodeType == 3;
+    }).text().replace(/^\s+|\s+$/g, '').replace('#','');
+
+    var score = $('span[itemprop="ratingValue"]').text();
+    // var stat_4 = $($("span:contains('Score:')")[0]).next().text();
+
+    // anime
+    var premiered = $($("span:contains('Premiered:')")[0]).next().text();
+    var studio = $($("span:contains('Studios:')")[0]).next().text();
+
+    // manga
+    var author = $($("span:contains('Authors:')")[0]).next().text();
+
+    var stats = {
+        name: name,
+        rank: rank,
+        score: score,
+        premiered: premiered,
+        studio: studio,
+        author: author};
+    console.log("got stuff:\n", stats);
+    return stats;
 }
-
-// var scrapeAnime = function(id, callback) {
-//     var url = "http://myanimelist.net/anime/" + id;
-//     console.log("scraping: " + url);
-//     request(url, function(err, resp, body) {
-//         if (err) {
-//             callback(err);
-//         } else {
-//             saveAnime(id, parseAnimeInfo(body), callback);
-//         }
-//     });
-// }
-
-// var saveAnime = function(id, stats, callback) {
-//     console.log("saving anime with stats: ", stats);
-
-//     var newAnime = new Anime({
-//         malid: id,
-//         title: stats.name,
-//         premiered: stats.premiered,
-//         studios: stats.studio,
-//         rank: Number(stats.rank),
-//         score: Number(stats.score)
-//     });
-
-//     var newAnimeData = newAnime.toObject();
-//     delete newAnimeData._id;
-
-//     Anime.findOneAndUpdate({'malid': id}, newAnimeData, {upsert:true, new:true}, function(err, anime) {
-//         if (err) {
-//             console.log("Error saving anime:");
-//             console.log(err);
-//             callback(err);
-//         } else {
-//             console.log("Anime successfully saved");
-//             console.log(anime);
-//             callback(null, anime);
-//         }
-//     });
-// }
-
-var parseAnimeInfo = function(data) {
-    console.log("parsing");
-    var $ = cheerio.load(data);
-    var name = $($('span[itemprop="name"]')[0]).text();
-    var stat_1 = $($("span:contains('Premiered:')")[0]).next().text();
-    var stat_2 = $($("span:contains('Studios:')")[0]).next().text();
-    var stat_3 = $($("span:contains('Ranked:')")[0]).parent().contents().filter(function() {
-        return this.nodeType == 3;
-    }).text().replace(/^\s+|\s+$/g, '').replace('#','');
-
-    var stat_4 = $('span[itemprop="ratingValue"]').text();
-    // var stat_4 = $($("span:contains('Score:')")[0]).next().text();
-    var stats = {
-        name: name,
-        premiered: stat_1,
-        studio: stat_2,
-        rank: stat_3,
-        score: stat_4};
-    console.log("got stuff:\n", stats);
-    return stats;
-};
-
-var parseMangaInfo = function(data) {
-    console.log("parsing");
-    var $ = cheerio.load(data);
-    var name = $($('span[itemprop="name"]')[0]).text();
-    var stat_1 = $($("span:contains('Authors:')")[0]).next().text();
-    var stat_3 = $($("span:contains('Ranked:')")[0]).parent().contents().filter(function() {
-        return this.nodeType == 3;
-    }).text().replace(/^\s+|\s+$/g, '').replace('#','');
-
-    // var stat_4 = $($("span:contains('Score:')")[0]).next().text();
-    var stat_4 = $('span[itemprop="ratingValue"]').text();
-    var stats = {
-        name: name,
-        author: stat_1,
-        rank: stat_3,
-        score: stat_4};
-    console.log("got stuff:\n", stats);
-    return stats;
-};
-
-
-// var scrapeManga = function(id, callback) {
-//     var url = "http://myanimelist.net/manga/" + id;
-//     console.log("scraping: " + url);
-//     request(url, function(err, resp, body) {
-//         if (err) {
-//             callback(err);
-//         } else {
-//             saveManga(id, parseMangaInfo(body), callback);
-//         }
-//     });
-// }
-
-// var saveManga = function(id, stats, callback) {
-//     console.log("saving manga with stats: ", stats);
-
-//     var newManga = new Manga({
-//         malid: id,
-//         title: stats.name,
-//         author: stats.author,
-//         rank: Number(stats.rank),
-//         score: Number(stats.score)
-//     });
-
-//     var newMangaData = newManga.toObject();
-//     delete newMangaData._id;
-
-//     Manga.findOneAndUpdate({'malid': id}, newMangaData, {upsert:true, new:true}, function(err, manga) {
-//         if (err) {
-//             console.log("Error saving anime:");
-//             console.log(err);
-//             callback(err);
-//         } else {
-//             console.log("Anime successfully saved");
-//             console.log(anime);
-//             callback(null, anime);
-//         }
-//     });
-// }
-
-
-
 
 module.exports = router;
