@@ -47,6 +47,7 @@ var getDb = function(type) {
 
 router.post('/requestData', function(req, res) {
     console.log(req.body);
+    console.log(JSON.parse(req.body));
 	console.log(req.body.ids);
 
     var type = req.body.type;

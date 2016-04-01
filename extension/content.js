@@ -52,14 +52,14 @@ console.log(ids);
 
 var getData = function(ids) {
   console.log("data:");
-  console.log({"ids": ids, "type": type});
+  console.log(JSON.stringify({"ids": ids, "type": type}));
   // TODO: fix de-param-ing in server
   // http://benalman.com/news/2009/12/jquery-14-param-demystified/
   $.ajaxSetup({ traditional: true });
   $.ajax({
     type: 'POST',
     url: "http://www.malcolumns.site/requestData",
-    data: {"ids": ids, "type": type},
+    data: JSON.stringify({"ids": ids, "type": type}),
     success: function(data) {
       console.log("got data: ", data.content.data);
       listData = data.content.data;
