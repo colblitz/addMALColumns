@@ -46,9 +46,10 @@ var getDb = function(type) {
 
 
 router.post('/requestData', function(req, res) {
-    console.log(req.body);
-    console.log(JSON.parse(req.body));
-	console.log(req.body.ids);
+ //    console.log(req);
+ //    console.log(req.body);
+ //    // console.log(JSON.parse(req.body));
+	// console.log(req.body.ids);
 
     var type = req.body.type;
     var ids = req.body.ids.map(function(a) { return Number(a); });
@@ -63,8 +64,9 @@ router.post('/requestData', function(req, res) {
 
         var toGet = ids.slice();
         var toReturn = {};
+        console.log("got: ", objects.map(function(o) { return o.malid; }));
         objects.forEach(function(a) {
-            console.log("retrieved " + type + ": ", a.malid);
+
             toReturn[a.malid] = stripped(type, a);
             var index = toGet.indexOf(a.malid);
 
@@ -79,7 +81,7 @@ router.post('/requestData', function(req, res) {
                 console.log("errors:", err);
             } else {
                 console.log("no errors");
-                console.log("results: ", results);
+                // console.log("results: ", results);
                 var i = 0;
                 results.forEach(function(a) {
                     if (a != null) {
@@ -116,7 +118,7 @@ var scrape = function(id, type, callback) {
 };
 
 var save = function(id, type, info, callback) {
-    console.log("saving " + type + " with info: ", info);
+    // console.log("saving " + type + " with info: ", info);
 
     var newThing;
     if (type == "anime") {
@@ -138,7 +140,7 @@ var save = function(id, type, info, callback) {
         });
     }
 
-    console.log("newThing: ", newThing);
+    // console.log("newThing: ", newThing);
 
     var newThingData = newThing.toObject();
     delete newThingData._id;
@@ -149,8 +151,8 @@ var save = function(id, type, info, callback) {
             console.log(err);
             callback(err);
         } else {
-            console.log(type + " successfully saved");
-            console.log(thing);
+            // console.log(type + " successfully saved");
+            // console.log(thing);
             callback(null, stripped(type, thing));
         }
     });
@@ -178,7 +180,8 @@ var stripped = function(type, thing) {
 };
 
 var parseInfo = function(data) {
-    console.log("parsing");
+    // TODO: log if get 0 stats
+    // console.log("parsing");
     var $ = cheerio.load(data);
     // both
     var name = $($('span[itemprop="name"]')[0]).text();

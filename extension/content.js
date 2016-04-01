@@ -36,14 +36,25 @@ var testNewList = function() {
 var isNewList = testNewList();
 
 var getListIds = function() {
-    var ids;
+  console.log("getlistids");
+    var ids = [];
     if (isNewList) {
         var data = $('table.list-table').data();
-        ids = data["items"].map(function(o) { return o["anime_id"]; });
+        data["items"].forEach(function(o) {
+          ids.push(o["anime_id"]);
+        });
+        // ids = data["items"].map(function(o) { return o["anime_id"]; });
     } else {
-        var more = $('[id^=more');
-        ids = more.map(function(i, el) { return parseInt($(el).attr('id').replace("more", "")); });
+        var more = $('[id^=more]');
+        // console.log(more);
+        more.each(function(i, el) {
+          ids.push(parseInt($(el).attr('id').replace("more", "")));
+        });
+        // ids = more.map(function(i, el) { return parseInt($(el).attr('id').replace("more", "")); });
     }
+    console.log("lajsldfjkasdf ", typeof(ids));
+    console.log(Array.isArray(ids));
+    // todo make this an array
     return ids;
 };
 
@@ -51,15 +62,18 @@ var ids = getListIds();
 console.log(ids);
 
 var getData = function(ids) {
-  console.log("data:");
-  console.log(JSON.stringify({"ids": ids, "type": type}));
+  // console.log("data:");
+  // console.log(ids);
+  // console.log(typeof(ids));
+  // console.log(type);
+  // console.log(JSON.stringify({"ids": ids, "type": type}));
   // TODO: fix de-param-ing in server
   // http://benalman.com/news/2009/12/jquery-14-param-demystified/
   $.ajaxSetup({ traditional: true });
   $.ajax({
     type: 'POST',
     url: "http://www.malcolumns.site/requestData",
-    data: JSON.stringify({"ids": ids, "type": type}),
+    data: {"ids": ids, "type": type},
     success: function(data) {
       console.log("got data: ", data.content.data);
       listData = data.content.data;
@@ -71,6 +85,7 @@ var getData = function(ids) {
 var listData = getData(ids);
 
 var columns = {};
+var headers = {};
 
 var columnToField = {
   "season": "premiered",
@@ -106,30 +121,35 @@ var getDataForColumn = function(id, column) {
 var addColumn = function(name) {
     // adjust table width;
     // $("#list_surround").width(1100);
-    var allItems = {}
+    var allItems = {};
+    console.log(headers);
+    headers[name] = [];
     // add columns
     if (isNewList) {
         var headerRow = $("tr.list-table-header");
-        headerRow.append('<th class="header-title type">' + name.capitalizeFirstLetter() + '</th>');
+        var headerCell = $('<th class="header-title ' + name + '">' + name.capitalizeFirstLetter() + '</th>');
+        headerRow.append(headerCell);
+        headers[name].push(headerCell);
 
         var tableRows = $("tr.list-table-data");
         tableRows.map(function(i, el) {
             var id = parseInt($(el).next().attr('id').replace("more-", ""));
             // var data = id;
             var data = getDataForColumn(id, name);
-            var newCell = $('<td class="data-' + name + '">' + data + '</td>');
+            var newCell = $('<td class="data ' + name + '">' + data + '</td>');
             allItems[id] = newCell;
             $(el).append(newCell);
         });
     } else {
-        var headers = $('[class^=header_');
-        headers.map(function(i, el) {
+        var headerRows = $('[class^=header_');
+        headerRows.map(function(i, el) {
             var headerTable = $(el).next();
             var headerRow = headerTable.find("tr");
             var headerCol = headerTable.find("td").last();
 
             var newCell = $('<td class="table_header" width="90" align="center" nowrap=""><strong>' + name.capitalizeFirstLetter() + '</strong></td>');
             headerRow.append(newCell);
+            headers[name].push(newCell);
             // TODO: ??
             // allItems.push(newCell);
         })
@@ -158,13 +178,33 @@ var showColumn = function(colName, show) {
   // console.log(columns);
   if (colName in columns) {
     if (show) {
-      columns[colName].forEach(function(el, i) {
-        $(el).show();
-      });
+      // console.log("show");
+      // console.log(columns[colName]);
+      // console.log(typeof(columns[colName]));
+      // columns[colName].forEach(function(el, i) {
+      //   console.log("el: ", el);
+      //   console.log(i);
+      //   $(el).show();
+      // });
+      for (id in columns[colName]) {
+        $(columns[colName][id]).show();
+      }
+      for (i in headers[colName]) {
+        headers[colName][i].show();
+      }
     } else {
-      columns[colName].forEach(function(el, i) {
-        $(el).hide();
-      });
+      // console.log("show");
+      // console.log(columns[colName]);
+      // console.log(typeof(columns[colName]));
+      for (id in columns[colName]) {
+        $(columns[colName][id]).hide();
+      }
+      for (i in headers[colName]) {
+        headers[colName][i].hide();
+      }
+      // columns[colName].forEach(function(el, i) {
+      //   $(el).hide();
+      // });
     }
   } else {
     if (show) {
