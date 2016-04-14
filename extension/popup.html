@@ -34,13 +34,31 @@
   <body>
     <div id="status"></div>
     <img id="image-result" hidden>
-    <div>ASDF</div>
-    <input class="columnCheck" id="season" type="checkbox" name="season" />Season<br>
-    <input class="columnCheck" id="studio" type="checkbox" name="studio" />Studio<br>
-    <input class="columnCheck" id="score" type="checkbox" name="score" />Score<br>
-    <input class="columnCheck" id="rank" type="checkbox" name="rank" />Rank<br>
-    <button id="button1" type="button">click</button>
-    <button id="button2" type="button">test</button>
+      <table>
+        <tr>
+          <th>Anime</th>
+          <th>Manga</th>
+        </tr>
+        <tr>
+          <td><label><input class="columnCheck" id="a-season" type="checkbox" name="a-season" />Season</label></td>
+          <td><label><input class="columnCheck" id="m-published" type="checkbox" name="m-published" />Published</label></td>
+        </tr>
+        <tr>
+          <td><label><input class="columnCheck" id="a-studio" type="checkbox" name="a-studio" />Studio</label></td>
+          <td><label><input class="columnCheck" id="m-author" type="checkbox" name="m-author" />Author</label></td>
+        </tr>
+        <tr>
+          <td><label><input class="columnCheck" id="a-score" type="checkbox" name="a-score" />Score</label></td>
+          <td><label><input class="columnCheck" id="m-score" type="checkbox" name="m-score" />Score</label></td>
+        </tr>
+        <tr>
+          <td><label><input class="columnCheck" id="a-rank" type="checkbox" name="a-rank" />Rank</label></td>
+          <td><label><input class="columnCheck" id="m-rank" type="checkbox" name="m-rank" />Rank</label></td>
+        </tr>
+      </table>
+    <button id="button-select-all" type="button">Select All</button>
+    <button id="button-deselect-all" type="button">Unselect All</button>
+    <button id="button" type="button">Update</button>
   </body>
 </html>
 

@@ -4,8 +4,8 @@ var Schema = mongoose.Schema;
 var Anime = Schema({
 	malid: {type: Number, unique: true},
 	title: String,
-	premiered: String,
-	studios: String,
+	season: String,
+	studio: String,
 	rank: Number,
 	score: Number,
 	time: { type: Date, default: Date.now }

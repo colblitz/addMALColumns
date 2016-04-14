@@ -8,25 +8,46 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   });
 
-  // add functionality for button
-  var button = document.getElementById('button1');
-  button.addEventListener('click', function() {
+  var getState = function() {
     var columns = {};
     $('.columnCheck').each(function() {
       columns[$(this).prop('name')] = $(this).prop('checked');
     });
+    return columns;
+  }
 
-    chrome.extension.getBackgroundPage().testRequest(columns);
-    chrome.storage.local.set({"columns": columns}, function() {
+  var saveState = function() {
+    var columns = getState();
+    chrome.storage.local.set({
+      "columns": columns
+    }, function() {
       if (chrome.runtime.lastError) {
         alert('Error setting columns:\n' + chrome.runtime.lastError);
       }
     });
+  };
+
+  // Add button functionality
+  var button = document.getElementById('button');
+  button.addEventListener('click', function() {
+    chrome.extension.getBackgroundPage().testRequest(getState());
+    saveState();
   }, false);
 
-  // add functionality for button
-  var button2 = document.getElementById('button2');
-  button2.addEventListener('click', function() {
-    chrome.extension.getBackgroundPage().testButton();
-  }, false);
+  var checkAll = document.getElementById('button-select-all');
+  checkAll.addEventListener('click', function() {
+    $('.columnCheck').each(function() {
+      $(this).prop('checked', true);
+    });
+    saveState();
+  });
+
+  var uncheckAll = document.getElementById('button-deselect-all');
+  uncheckAll.addEventListener('click', function() {
+    $('.columnCheck').each(function() {
+      $(this).prop('checked', false);
+    });
+    saveState();
+  });
+
 }, false);

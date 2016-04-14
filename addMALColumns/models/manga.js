@@ -4,6 +4,7 @@ var Schema = mongoose.Schema;
 var Manga = Schema({
 	malid: {type: Number, unique: true},
 	title: String,
+	published: String,
 	author: String,
 	rank: Number,
 	score: Number,
