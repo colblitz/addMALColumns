@@ -80,7 +80,6 @@ router.post('/requestData', function(req, res) {
       if (err) {
         console.log("errors:", err);
       } else {
-        console.log("no errors");
         var i = 0;
         results.forEach(function(a) {
           if (a != null) {
@@ -88,7 +87,7 @@ router.post('/requestData', function(req, res) {
             i++;
           }
         });
-        console.log("no errors, returning ", toReturn.length, " things after ", new Date().getTime() - start);
+        console.log("no errors, returning ", Object.keys(toReturn).length, " things after ", new Date().getTime() - start);
         sendSuccess(res, {
           time: new Date().getTime() - start,
           attempted: toGet.length,
@@ -153,10 +152,18 @@ var save = function(id, type, info, callback) {
       console.log(err);
       callback(err);
     } else {
-      console.log("New entry to db: ", thing);
+      console.log("New entry to db: ", oneLine(type, thing));
       callback(null, stripped(type, thing));
     }
   });
+};
+
+var oneLine = function(type, t) {
+  if (type == "anime") {
+    return [t.malid, t.title, t.season, t.studio, t.rank, t.score, t.time].join(" || ");
+  } else if (type == "manga") {
+    return [t.malid, t.title, t.published, t.author, t.rank, t.score, t.time].join(" || ");
+  }
 };
 
 var stripped = function(type, thing) {
@@ -210,7 +217,6 @@ var parseInfo = function(data) {
     studio: studio,
     author: author
   };
-  console.log("got stuff:\n", stats);
   return stats;
 }
 
