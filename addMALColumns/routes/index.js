@@ -202,7 +202,11 @@ var parseInfo = function(data) {
 
   // anime
   var season = $($("span:contains('Premiered:')")[0]).next().text();
+  var aired = $($("span:contains('Aired:')")[0]).parent().contents().filter(function() {
+    return this.nodeType == 3;
+  }).text().trim();
   var studio = $($("span:contains('Studios:')")[0]).next().text();
+
 
   // manga
   var author = $($("span:contains('Authors:')")[0]).next().text();
@@ -215,7 +219,7 @@ var parseInfo = function(data) {
     name: name,
     rank: rank,
     score: score,
-    season: season,
+    season: season != "" : season : aired,
     published: published,
     studio: studio,
     author: author

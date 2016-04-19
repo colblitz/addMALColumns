@@ -91,20 +91,23 @@ var getDataForColumn = function(id, column) {
   }
 };
 
-
+var columnWidths = {
+  "a-season": 90,
+  "a-studio": 100,
+  "a-score": 45,
+  "a-rank": 50,
+  "m-published": 175,
+  "m-author": 115,
+  "m-score": 45,
+  "m-rank": 50
+}
 
 var addColumn = function(columnName) {
-  if (newList) {
-
-  } else {
-    $("#list_surround").width(1100);
-  }
-  // adjust table width;
-  // $("#list_surround").width(1100);
   var allItems = {};
   var cField = getField(columnName);
   var cHeader = getHeader(columnName);
   var cClass = getClass(columnName);
+  var cWidth = columnWidths[columnName];
   headers[columnName] = [];
   // add columns
   if (newList) {
@@ -129,7 +132,7 @@ var addColumn = function(columnName) {
       var headerRow = headerTable.find("tr");
       var headerCol = headerTable.find("td").last();
 
-      var newCell = $('<td class="table_header" width="90" align="center" nowrap=""><strong>' + cHeader + '</strong></td>');
+      var newCell = $('<td class="table_header" width="' + cWidth + '" align="center" nowrap=""><strong>' + cHeader + '</strong></td>');
       headerRow.append(newCell);
       headers[columnName].push(newCell);
       // TODO: ??
@@ -146,7 +149,7 @@ var addColumn = function(columnName) {
 
       var id = parseInt($(el).attr('id').replace("more", ""));
       var data = getDataForColumn(id, columnName);
-      var newCell = $('<td class="' + tdType + ' ' + cClass + '" align="center" width="90"><span id="">' + data + '</span></td>');
+      var newCell = $('<td class="' + tdType + ' ' + cClass + '" align="center" width="' + cWidth + '"><span id="">' + data + '</span></td>');
       rowRow.append(newCell);
       allItems[id] = newCell;
     })
@@ -156,24 +159,26 @@ var addColumn = function(columnName) {
 };
 
 var showColumns = function(colNames, show) {
-  console.log(colNames);
-  console.log(Object.keys(columns));
+  shownColumns = [];
   for (colName in columns) {
     if (colNames == null || colName in colNames) {
-      console.log("should show: ", show, " ", colName);
       var shouldShow = show;
       if (show == null) {
         shouldShow = colNames[colName];
       }
-      console.log("should show: ", shouldShow, " ", colName);
       for (id in columns[colName]) {
         $(columns[colName][id]).toggle(shouldShow);
       }
       for (i in headers[colName]) {
         headers[colName][i].toggle(shouldShow);
       }
+      if (shouldShow) {
+        shownColumns.push(colName);
+      }
     }
   }
+  // TODO: fix - can't use incremental every time
+  // fixTableWidth();
 };
 
 var sortColumn = function(name) {
@@ -195,17 +200,66 @@ var initializeColumns = function() {
   showColumns(null, true);
 };
 
+var incrementWidth = function(x, n) {
+  x.width(x.width() + n);
+};
+
+var fixTableWidth = function() {
+
+
+  var newColumns = 0;
+  for (colName in shownColumns) {
+    newColumns += columnWidths[shownColumns[colName]];
+  }
+  // if (type == "anime") {
+  //   newColumns = columnWidths["a-season"] +
+  //                columnWidths["a-studio"] +
+  //                columnWidths["a-score"] +
+  //                columnWidths["a-rank"];
+  // } else {
+  //   newColumns = columnWidths["m-published"] +
+  //                columnWidths["m-author"] +
+  //                columnWidths["m-score"] +
+  //                columnWidths["m-rank"];
+  // }
+
+  if (newList) {
+    // $(".header").width()
+    // $("#list-container").width()
+    // $(".cover-block").width()
+    // $(".cover-block .image-container").width()
+    // $(".status-menu-container").width()
+    // $(".list-unit").width()
+    // $(".list-unit .list-status-title").width()
+    // $(".list-unit .list-stats").width()
+
+
+
+  } else {
+    // $("#list_surround").width(1200);
+    // incrementWidth($("#list_surround"), newColumns);
+    // $("#list_surround").width($("#list_surround").width() + newColumns);
+
+    // 920 -> 1100
+    // if ($('#list_surround').css('width') == null ) {
+    //   console.log("no custom css");
+    //   ;
+    // }
+  }
+}
+
 // initialize things
 
 var type = isAnimeList() ? "anime" : "manga";
 var newList = isNewList();
 var ids = getListIds();
-console.log("type: ", type);
-console.log("isNewList: ", newList);
-console.log("ids: ", ids);
+// console.log("type: ", type);
+// console.log("isNewList: ", newList);
+// console.log("ids: ", ids);
 var columns = {};
 var headers = {};
 var listData = null;
+var shownColumns = [];
 
 setTimeout(function() {
   initializeColumns();
@@ -223,4 +277,15 @@ setTimeout(function() {
   });
 }, 50);
 
+// TODO: adjust table, check for custom CSS
+// fixTableWidth();
+incrementWidth($("#list_surround"), 300);
 
+incrementWidth($(".header"), 300);
+incrementWidth($("#list-container"), 300);
+incrementWidth($(".cover-block"), 300);
+incrementWidth($(".cover-block .image-container"), 300);
+incrementWidth($(".status-menu-container"), 300);
+incrementWidth($(".list-unit"), 300);
+incrementWidth($(".list-unit .list-status-title"), 300);
+incrementWidth($(".list-unit .list-stats"), 300);
