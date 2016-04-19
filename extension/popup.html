@@ -40,24 +40,32 @@
           <th>Manga</th>
         </tr>
         <tr>
-          <td><label><input class="columnCheck" id="a-season" type="checkbox" name="a-season" />Season</label></td>
-          <td><label><input class="columnCheck" id="m-published" type="checkbox" name="m-published" />Published</label></td>
+          <td><label><input class="columnCheck aColumnCheck" id="a-season" type="checkbox" name="a-season" />Season</label></td>
+          <td><label><input class="columnCheck mColumnCheck" id="m-published" type="checkbox" name="m-published" />Published</label></td>
         </tr>
         <tr>
-          <td><label><input class="columnCheck" id="a-studio" type="checkbox" name="a-studio" />Studio</label></td>
-          <td><label><input class="columnCheck" id="m-author" type="checkbox" name="m-author" />Author</label></td>
+          <td><label><input class="columnCheck aColumnCheck" id="a-studio" type="checkbox" name="a-studio" />Studio</label></td>
+          <td><label><input class="columnCheck mColumnCheck" id="m-author" type="checkbox" name="m-author" />Author</label></td>
         </tr>
         <tr>
-          <td><label><input class="columnCheck" id="a-score" type="checkbox" name="a-score" />Score</label></td>
-          <td><label><input class="columnCheck" id="m-score" type="checkbox" name="m-score" />Score</label></td>
+          <td><label><input class="columnCheck aColumnCheck" id="a-score" type="checkbox" name="a-score" />Score</label></td>
+          <td><label><input class="columnCheck mColumnCheck" id="m-score" type="checkbox" name="m-score" />Score</label></td>
         </tr>
         <tr>
-          <td><label><input class="columnCheck" id="a-rank" type="checkbox" name="a-rank" />Rank</label></td>
-          <td><label><input class="columnCheck" id="m-rank" type="checkbox" name="m-rank" />Rank</label></td>
+          <td><label><input class="columnCheck aColumnCheck" id="a-rank" type="checkbox" name="a-rank" />Rank</label></td>
+          <td><label><input class="columnCheck mColumnCheck" id="m-rank" type="checkbox" name="m-rank" />Rank</label></td>
+        </tr>
+        <tr>
+          <td><button id="a-button-select-all" type="button">Select All</button></td>
+          <td><button id="m-button-select-all" type="button">Select All</button></td>
+        </tr>
+        <tr>
+          <td><button id="a-button-deselect-all" type="button">Unselect All</button></td>
+          <td><button id="m-button-deselect-all" type="button">Unselect All</button></td>
         </tr>
       </table>
-    <button id="button-select-all" type="button">Select All</button>
-    <button id="button-deselect-all" type="button">Unselect All</button>
+
+
     <button id="button" type="button">Update</button>
   </body>
 </html>

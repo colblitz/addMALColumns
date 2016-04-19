@@ -206,7 +206,10 @@ var parseInfo = function(data) {
 
   // manga
   var author = $($("span:contains('Authors:')")[0]).next().text();
-  var published = $($("span:contains('Published:')")[0]).next().text();
+  // var published = $($("span:contains('Published:')")[0]).next().text();
+  var published = $($("span:contains('Published:')")[0]).parent().contents().filter(function() {
+    return this.nodeType == 3;
+  }).text().replace(/\s+/g, ' ').trim();
 
   var stats = {
     name: name,

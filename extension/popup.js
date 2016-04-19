@@ -34,17 +34,33 @@ document.addEventListener('DOMContentLoaded', function() {
     saveState();
   }, false);
 
-  var checkAll = document.getElementById('button-select-all');
-  checkAll.addEventListener('click', function() {
-    $('.columnCheck').each(function() {
+  var aCheckAll = document.getElementById('a-button-select-all');
+  aCheckAll.addEventListener('click', function() {
+    $('.aColumnCheck').each(function() {
       $(this).prop('checked', true);
     });
     saveState();
   });
 
-  var uncheckAll = document.getElementById('button-deselect-all');
-  uncheckAll.addEventListener('click', function() {
-    $('.columnCheck').each(function() {
+  var aUncheckAll = document.getElementById('a-button-deselect-all');
+  aUncheckAll.addEventListener('click', function() {
+    $('.aColumnCheck').each(function() {
+      $(this).prop('checked', false);
+    });
+    saveState();
+  });
+
+  var mCheckAll = document.getElementById('m-button-select-all');
+  mCheckAll.addEventListener('click', function() {
+    $('.mColumnCheck').each(function() {
+      $(this).prop('checked', true);
+    });
+    saveState();
+  });
+
+  var mUncheckAll = document.getElementById('m-button-deselect-all');
+  mUncheckAll.addEventListener('click', function() {
+    $('.mColumnCheck').each(function() {
       $(this).prop('checked', false);
     });
     saveState();

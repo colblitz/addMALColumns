@@ -86,12 +86,19 @@ var getDataForColumn = function(id, column) {
   if (listData != null) {
     return listData[id][field];
   } else {
-    console.log("null list data");
+    // console.log("null list data");
     return "";
   }
 };
 
+
+
 var addColumn = function(columnName) {
+  if (newList) {
+
+  } else {
+    $("#list_surround").width(1100);
+  }
   // adjust table width;
   // $("#list_surround").width(1100);
   var allItems = {};
@@ -149,13 +156,21 @@ var addColumn = function(columnName) {
 };
 
 var showColumns = function(colNames, show) {
+  console.log(colNames);
+  console.log(Object.keys(columns));
   for (colName in columns) {
     if (colNames == null || colName in colNames) {
+      console.log("should show: ", show, " ", colName);
+      var shouldShow = show;
+      if (show == null) {
+        shouldShow = colNames[colName];
+      }
+      console.log("should show: ", shouldShow, " ", colName);
       for (id in columns[colName]) {
-        $(columns[colName][id]).toggle(show);
+        $(columns[colName][id]).toggle(shouldShow);
       }
       for (i in headers[colName]) {
-        headers[colName][i].toggle(show);
+        headers[colName][i].toggle(shouldShow);
       }
     }
   }
@@ -196,6 +211,16 @@ setTimeout(function() {
   initializeColumns();
 
   // request to get data
+  console.log("1");
   listData = getData(ids);
+  console.log("2");
   refillColumns(listData);
-}, 500);
+  console.log("3");
+
+  chrome.storage.local.get(["columns"], function(columns) {
+    console.log("from storage columns: ", columns);
+    showColumns(columns.columns);
+  });
+}, 50);
+
+
