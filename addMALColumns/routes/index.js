@@ -81,13 +81,14 @@ router.post('/requestData', function(req, res) {
         console.log("errors:", err);
       } else {
         var i = 0;
+        var retrieved = Object.keys(toReturn).length;
         results.forEach(function(a) {
           if (a != null) {
             toReturn[a.malid] = a;
             i++;
           }
         });
-        console.log("no errors, returning ", Object.keys(toReturn).length, " things after ", new Date().getTime() - start);
+        console.log("no errors, returning ", Object.keys(toReturn).length, " things after ", new Date().getTime() - start, " with ", retrieved, " from db");
         sendSuccess(res, {
           time: new Date().getTime() - start,
           attempted: toGet.length,

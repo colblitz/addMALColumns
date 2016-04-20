@@ -31,7 +31,7 @@ var getHeader = function(columnId) {
 };
 
 var getClass = function(columnId) {
-  return "amc-" + columnId.slice(2);
+  return "" + columnId.slice(2);
 };
 
 // main methods
@@ -102,6 +102,57 @@ var columnWidths = {
   "m-rank": 50
 }
 
+function sortUsingCustom(parent, childSelector, sortFunction) {
+  var items = parent.children(childSelector).sort(sortFunction);
+  parent.append(items);
+};
+
+var columnFunction = function(columnName) {
+  return function() {
+    sortUsingCustom($('.list-table'), "tbody.list-item", function(a, b) {
+      // console.log(columnName);
+      var vA = $("td." + columnName, a).text();
+      var vB = $("td." + columnName, b).text();
+      if (!isNaN(parseFloat(vA))) {
+        vA = parseFloat(vA);
+        vB = parseFloat(vB);
+      }
+      return (vA < vB) ? -1 : (vA > vB) ? 1 : 0;
+    });
+  };
+};
+
+// var sortColumn = function(name) {
+  // http://stackoverflow.com/questions/7831712/jquery-sort-divs-by-innerhtml-of-children
+// };
+
+// function sortUsingNestedText(parent, childSelector, keySelector) {
+//   var items = parent.children(childSelector).sort(function(a, b) {
+//     var vA = $(keySelector, a).text();
+//     var vB = $(keySelector, b).text();
+//     return (vA < vB) ? -1 : (vA > vB) ? 1 : 0;
+//   });
+//   parent.append(items);
+// }
+
+
+
+
+
+// sortUsingNestedText($('#sortThis'), "div", "span.price");
+
+// function sortUsingNestedText(parent, childSelector, keySelector) {
+//   var items = parent.children(childSelector).sort(function(a, b) {
+//     var vA = $(keySelector, a).text();
+//     var vB = $(keySelector, b).text();
+//     return (vA < vB) ? -1 : (vA > vB) ? 1 : 0;
+//   });
+//   parent.append(items);
+// }
+
+
+// sortUsingNestedText($('#sortThis'), "div", "span.price");
+
 var addColumn = function(columnName) {
   var allItems = {};
   var cField = getField(columnName);
@@ -112,7 +163,13 @@ var addColumn = function(columnName) {
   // add columns
   if (newList) {
     var headerRow = $("tr.list-table-header");
-    var headerCell = $('<th class="header-title ' + cClass + '">' + cHeader + '</th>');
+    var headerId = "header-link-" + cHeader;
+    var headerCell = $('<th class="header-title ' + cClass + '"><a id="' + headerId + '" class="link sort">' + cHeader + '</a></th>');
+
+    $(headerCell).click(function() {
+      columnFunction(cField).call();
+    });
+
     headerRow.append(headerCell);
     headers[columnName].push(headerCell);
 
@@ -181,9 +238,7 @@ var showColumns = function(colNames, show) {
   // fixTableWidth();
 };
 
-var sortColumn = function(name) {
-  // http://stackoverflow.com/questions/7831712/jquery-sort-divs-by-innerhtml-of-children
-};
+
 
 var initializeColumns = function() {
   if (type == "anime") {
