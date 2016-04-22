@@ -9,7 +9,7 @@ var Manga = require('../models/manga');
 
 var router = express.Router();
 
-var MAXDIFF = 1000 * 60 * 60 * 24; // milliseconds in a day
+var MAXDIFF = 1000 * 60 * 60 * 24 * 7;
 
 ////////
 // Stuff
