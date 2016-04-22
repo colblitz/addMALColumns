@@ -107,51 +107,142 @@ function sortUsingCustom(parent, childSelector, sortFunction) {
   parent.append(items);
 };
 
+var months = {
+  "Jan" : "01",
+  "Feb" : "02",
+  "Mar" : "03",
+  "Apr" : "04",
+  "May" : "05",
+  "Jun" : "06",
+  "Jul" : "07",
+  "Aug" : "08",
+  "Sep" : "09",
+  "Oct" : "10",
+  "Nov" : "11",
+  "Dec" : "12"
+};
+
+var seasons = {
+  "Spring" : "04",
+  "Summer" : "07",
+  "Fall"   : "10",
+  "Winter" : "01"
+};
+
+var getColumnSortValue = function(v, columnName) {
+  // score/rank
+  if (!isNaN(parseFloat(v))) {
+    return parseFloat(v);
+  }
+  // console.log(columnName);
+  if (columnName.indexOf("season") > -1 || columnName.indexOf("published") > -1) {
+    // only use first part of ranges
+    if (v.indexOf("to") > -1) {
+      v = v.split("to")[0].trim();
+    }
+    // is date, else is season
+    if (v.indexOf(",") > -1) {
+      var year = v.split(",")[1].trim();
+      var mon = v.split(",")[0].trim().split(" ")[0].trim();
+      var day = v.split(",")[0].trim().split(" ")[1].trim();
+      v = year + months[mon] + day;
+    } else {
+      var year = v.split(" ")[1].trim();
+      var season = v.split(" ")[0].trim();
+      v = year + seasons[season];
+    }
+    return v;
+  }
+  return v;
+};
+
 var columnFunction = function(columnName) {
   return function() {
     sortUsingCustom($('.list-table'), "tbody.list-item", function(a, b) {
       // console.log(columnName);
-      var vA = $("td." + columnName, a).text();
-      var vB = $("td." + columnName, b).text();
-      if (!isNaN(parseFloat(vA))) {
-        vA = parseFloat(vA);
-        vB = parseFloat(vB);
-      }
-      return (vA < vB) ? -1 : (vA > vB) ? 1 : 0;
+      var vA = getColumnSortValue($("td." + columnName, a).text(), columnName);
+      var vB = getColumnSortValue($("td." + columnName, b).text(), columnName);
+      console.log(vA, " vs ", vB);
+      return columnSortDir[columnName] * ((vA < vB) ? -1 : (vA > vB) ? 1 : 0);
     });
+    columnSortDir[columnName] *= -1;
   };
 };
 
-// var sortColumn = function(name) {
-  // http://stackoverflow.com/questions/7831712/jquery-sort-divs-by-innerhtml-of-children
-// };
+var columnSortDir = {};
 
-// function sortUsingNestedText(parent, childSelector, keySelector) {
-//   var items = parent.children(childSelector).sort(function(a, b) {
-//     var vA = $(keySelector, a).text();
-//     var vB = $(keySelector, b).text();
-//     return (vA < vB) ? -1 : (vA > vB) ? 1 : 0;
-//   });
-//   parent.append(items);
-// }
+var flatten = function(a) {
+  return $.map(a, function(n){
+   return n;
+  });
+};
 
+var insertListAfter = function(a, l) {
+  var attach = a;
+  for (var i = 0; i < l.length; i++) {
+    $(l[i]).insertAfter($(attach));
+    attach = l[i];
+  }
+};
 
+var columnLists = {};
+var columnAttach = {};
+var getColumnLists = function() {
 
+  var rows = $('#list_surround table');
+  var currentChunk = "";
+  var chunk = [];
+  var attachRow;
+  for (var i = 0; i < rows.length; i++) {
+    var row = rows[i];
+    var isRow = $(row).next().is('[id^=more');
+    if (!isRow) {
+      if ($(row).is('[class^=header_')) {
+        attachRow = $(row).next();
+        currentChunk = $(row).attr('class');
+      }
 
+      if (chunk.length != 0) {
+        columnLists[currentChunk] = chunk.slice();
+        columnAttach[currentChunk] = attachRow;
+        console.log(currentChunk, " has ", chunk.length);
+        chunk = [];
+      }
+    } else {
+      chunk.push([$(row), $(row).next()]);
+    }
+  }
+};
 
-// sortUsingNestedText($('#sortThis'), "div", "span.price");
+var oldColumnFunction = function(sectionName, columnName) {
+  return function() {
+    // sort things
+    columnLists[sectionName].sort(function(a, b) {
+      var vA = getColumnSortValue($(a[0]).find('td.' + columnName).text(), columnName);
+      var vB = getColumnSortValue($(b[0]).find('td.' + columnName).text(), columnName);
+      return columnSortDir[columnName] * ((vA < vB) ? -1 : (vA > vB) ? 1 : 0);
+    });
+    columnSortDir[columnName] *= -1;
+    // detach things
+    for (var i = 0; i < columnLists[sectionName].length; i++) {
+      columnLists[sectionName][i][0].detach();
+      columnLists[sectionName][i][1].detach();
+    }
+    // get copy of things and redo styling
+    var toInsert = flatten(columnLists[sectionName]);
+    var newClass = "td1";
+    for (var i = 0; i < toInsert.length; i ++) {
+      // only table elements, not more divs
+      if ($(toInsert[i]).is('table')) {
+        $(toInsert[i]).find('td').removeClass("td1 td2").addClass(newClass);
+        newClass = (newClass == "td1" ? "td2" : "td1");
+      }
+    }
+    // insert (copy of) things back in
+    insertListAfter(columnAttach[sectionName], toInsert);
+  };
+};
 
-// function sortUsingNestedText(parent, childSelector, keySelector) {
-//   var items = parent.children(childSelector).sort(function(a, b) {
-//     var vA = $(keySelector, a).text();
-//     var vB = $(keySelector, b).text();
-//     return (vA < vB) ? -1 : (vA > vB) ? 1 : 0;
-//   });
-//   parent.append(items);
-// }
-
-
-// sortUsingNestedText($('#sortThis'), "div", "span.price");
 
 var addColumn = function(columnName) {
   var allItems = {};
@@ -159,6 +250,7 @@ var addColumn = function(columnName) {
   var cHeader = getHeader(columnName);
   var cClass = getClass(columnName);
   var cWidth = columnWidths[columnName];
+  columnSortDir[cField] = 1;
   headers[columnName] = [];
   // add columns
   if (newList) {
@@ -190,6 +282,11 @@ var addColumn = function(columnName) {
       var headerCol = headerTable.find("td").last();
 
       var newCell = $('<td class="table_header" width="' + cWidth + '" align="center" nowrap=""><strong>' + cHeader + '</strong></td>');
+
+      $(newCell).click(function() {
+        oldColumnFunction($(el).attr('class'), cField).call();
+      });
+
       headerRow.append(newCell);
       headers[columnName].push(newCell);
       // TODO: ??
@@ -202,7 +299,7 @@ var addColumn = function(columnName) {
       var rowRow = rowTable.find("tr");
       var rowCol = rowTable.find("td").last();
 
-      var tdType = rowCol.attr("class");
+      var tdType = rowCol.attr("class").split(' ')[0];
 
       var id = parseInt($(el).attr('id').replace("more", ""));
       var data = getDataForColumn(id, columnName);
@@ -317,6 +414,9 @@ var listData = null;
 var shownColumns = [];
 
 setTimeout(function() {
+  if (!newList) {
+    getColumnLists();
+  }
   initializeColumns();
 
   // request to get data
