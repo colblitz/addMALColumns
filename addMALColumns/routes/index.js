@@ -220,7 +220,7 @@ var parseInfo = function(data) {
     name: name,
     rank: rank,
     score: score,
-    season: season != "" : season : aired,
+    season: (season != "" ? season : aired),
     published: published,
     studio: studio,
     author: author
