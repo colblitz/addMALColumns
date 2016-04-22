@@ -66,7 +66,6 @@ var getData = function(ids) {
     },
     success: function(data) {
       listData = data.content.data;
-      console.log(listData);
       refillColumns(listData);
     }
   });
@@ -134,7 +133,6 @@ var getColumnSortValue = function(v, columnName) {
   if (!isNaN(parseFloat(v))) {
     return parseFloat(v);
   }
-  // console.log(columnName);
   if (columnName.indexOf("season") > -1 || columnName.indexOf("published") > -1) {
     // only use first part of ranges
     if (v.indexOf("to") > -1) {
@@ -159,10 +157,8 @@ var getColumnSortValue = function(v, columnName) {
 var columnFunction = function(columnName) {
   return function() {
     sortUsingCustom($('.list-table'), "tbody.list-item", function(a, b) {
-      // console.log(columnName);
       var vA = getColumnSortValue($("td." + columnName, a).text(), columnName);
       var vB = getColumnSortValue($("td." + columnName, b).text(), columnName);
-      console.log(vA, " vs ", vB);
       return columnSortDir[columnName] * ((vA < vB) ? -1 : (vA > vB) ? 1 : 0);
     });
     columnSortDir[columnName] *= -1;
@@ -205,7 +201,6 @@ var getColumnLists = function() {
       if (chunk.length != 0) {
         columnLists[currentChunk] = chunk.slice();
         columnAttach[currentChunk] = attachRow;
-        console.log(currentChunk, " has ", chunk.length);
         chunk = [];
       }
     } else {
@@ -356,58 +351,11 @@ var incrementWidth = function(x, n) {
   x.width(x.width() + n);
 };
 
-var fixTableWidth = function() {
-
-
-  var newColumns = 0;
-  for (colName in shownColumns) {
-    newColumns += columnWidths[shownColumns[colName]];
-  }
-  // if (type == "anime") {
-  //   newColumns = columnWidths["a-season"] +
-  //                columnWidths["a-studio"] +
-  //                columnWidths["a-score"] +
-  //                columnWidths["a-rank"];
-  // } else {
-  //   newColumns = columnWidths["m-published"] +
-  //                columnWidths["m-author"] +
-  //                columnWidths["m-score"] +
-  //                columnWidths["m-rank"];
-  // }
-
-  if (newList) {
-    // $(".header").width()
-    // $("#list-container").width()
-    // $(".cover-block").width()
-    // $(".cover-block .image-container").width()
-    // $(".status-menu-container").width()
-    // $(".list-unit").width()
-    // $(".list-unit .list-status-title").width()
-    // $(".list-unit .list-stats").width()
-
-
-
-  } else {
-    // $("#list_surround").width(1200);
-    // incrementWidth($("#list_surround"), newColumns);
-    // $("#list_surround").width($("#list_surround").width() + newColumns);
-
-    // 920 -> 1100
-    // if ($('#list_surround').css('width') == null ) {
-    //   console.log("no custom css");
-    //   ;
-    // }
-  }
-}
-
 // initialize things
 
 var type = isAnimeList() ? "anime" : "manga";
 var newList = isNewList();
 var ids = getListIds();
-// console.log("type: ", type);
-// console.log("isNewList: ", newList);
-// console.log("ids: ", ids);
 var columns = {};
 var headers = {};
 var listData = null;
@@ -420,14 +368,10 @@ setTimeout(function() {
   initializeColumns();
 
   // request to get data
-  console.log("1");
   listData = getData(ids);
-  console.log("2");
   refillColumns(listData);
-  console.log("3");
 
   chrome.storage.local.get(["columns"], function(columns) {
-    console.log("from storage columns: ", columns);
     showColumns(columns.columns);
   });
 }, 50);
